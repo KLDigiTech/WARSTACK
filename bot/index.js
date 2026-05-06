@@ -45,6 +45,11 @@ for (const file of eventFiles) {
     client.on(event.name, (...args) => event.execute(...args, client));
   }
 }
-
+// Mini serveur HTTP pour Render
+const http = require('http');
+http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end('WARSTACK BOT OK');
+}).listen(process.env.PORT || 3000);
 // --- Connexion ---
 client.login(process.env.DISCORD_TOKEN);
