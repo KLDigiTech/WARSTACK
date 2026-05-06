@@ -10,6 +10,28 @@ const path = require('path');
 const cron = require('node-cron');
 const { updateLeaderboard } = require('./jobs/leaderboard');
 const { postMVP } = require('./jobs/mvp');
+const express = require('express');
+const apiRouter = require('./api');
+
+// Serveur Express
+const app = express();
+app.use(express.json());
+
+// CORS pour le dashboard
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+  res.header('Access-Control-Allow-Methods', 'GET, POST');
+  next();
+});
+
+// Routes API
+app.use('/api', apiRouter);
+
+// Démarrage serveur
+app.listen(process.env.PORT || 3000, () => {
+  console.log('✅ API WARSTACK démarrée');
+});
 
 // --- Client Discord ---
 const client = new Client({

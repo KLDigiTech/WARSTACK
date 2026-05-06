@@ -4,6 +4,8 @@
 
 const SUPABASE_URL = 'https://eaiuibqpouwwkqdcwthl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhaXVpYnFwb3V3d2txZGN3dGhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODkyNzMsImV4cCI6MjA5MzY2NTI3M30.QHjd47M2ODKkYLvkCed5Ay4a5bPxxoBsk2aXeWlNk6M';
+const BOT_URL = 'https://warstack-bot.onrender.com';
+const API_KEY = 'warstack-secret-2026';
 
 // ============================================
 // SUPABASE HELPERS
@@ -40,6 +42,39 @@ async function deleteSupabase(endpoint) {
       'Authorization': `Bearer ${SUPABASE_KEY}`
     }
   });
+}
+
+// ============================================
+// BOT API
+// ============================================
+async function callBotAPI(endpoint, method = 'GET') {
+  try {
+    const res = await fetch(`${BOT_URL}/api/${endpoint}`, {
+      method,
+      headers: { 'x-api-key': API_KEY }
+    });
+    return res.json();
+  } catch (error) {
+    console.error('❌ Bot API error:', error);
+    return null;
+  }
+}
+
+// Status du bot
+async function checkBotStatus() {
+  const data = await callBotAPI('status');
+  const dot = document.querySelector('.status-dot');
+  const label = document.querySelector('.sidebar-status span');
+
+  if (data && data.status === 'online') {
+    dot.style.background = '#00ff41';
+    dot.style.boxShadow = '0 0 6px #00ff41';
+    label.textContent = 'BOT ONLINE';
+  } else {
+    dot.style.background = '#ff4444';
+    dot.style.boxShadow = '0 0 6px #ff4444';
+    label.textContent = 'BOT OFFLINE';
+  }
 }
 
 // ============================================
@@ -201,9 +236,20 @@ async function deletePlayer(discordId, pseudo) {
 // ============================================
 // TOURNOI ACTIONS
 // ============================================
-document.getElementById('btn-reset').addEventListener('click', async () => {
-  if (!confirm('Reset tout le classement ? (kills, deaths, kd, wins à 0)')) return;
+document.getElementById('btn-update').addEventListener('click', async () => {
+  const feedback = document.getElementById('action-feedback');
+  feedback.textContent = '⏳ Envoi en cours...';
+  const data = await callBotAPI('leaderboard', 'POST');
+  if (data?.success) {
+    feedback.textContent = '✅ Leaderboard posté dans #classement !';
+  } else {
+    feedback.textContent = '❌ Erreur — bot offline ?';
+  }
+  setTimeout(() => feedback.textContent = '', 3000);
+});
 
+document.getElementById('btn-reset').addEventListener('click', async () => {
+  if (!confirm('Reset tout le classement ?')) return;
   const players = await fetchSupabase('players?select=discord_id');
   for (const p of players) {
     await updateSupabase(
@@ -211,21 +257,14 @@ document.getElementById('btn-reset').addEventListener('click', async () => {
       { kills: 0, deaths: 0, kd: 0, wins: 0 }
     );
   }
-
-  document.getElementById('action-feedback').textContent = '✅ Classement reset avec succès !';
-  setTimeout(() => {
-    document.getElementById('action-feedback').textContent = '';
-  }, 3000);
-});
-
-document.getElementById('btn-update').addEventListener('click', () => {
-  document.getElementById('action-feedback').textContent = '✅ Mise à jour forcée — le bot va poster dans #classement dans 1 minute.';
-  setTimeout(() => {
-    document.getElementById('action-feedback').textContent = '';
-  }, 3000);
+  const feedback = document.getElementById('action-feedback');
+  feedback.textContent = '✅ Classement reset !';
+  setTimeout(() => feedback.textContent = '', 3000);
 });
 
 // ============================================
 // INIT
 // ============================================
 loadOverview();
+checkBotStatus();
+setInterval(checkBotStatus, 30000);

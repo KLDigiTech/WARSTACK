@@ -14,6 +14,9 @@ module.exports = {
   execute(client) {
     console.log(`✅ WARSTACK connecté en tant que ${client.user.tag}`);
 
+    // Expose le client globalement pour l'API
+    global.botClient = client;
+
     // Statut affiché sous le nom du bot
     client.user.setActivity('⚔️ Battlefield 6 | /help', {
       type: 'WATCHING'
