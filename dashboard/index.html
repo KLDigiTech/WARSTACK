@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WARSTACK — Dashboard</title>
+  <link rel="stylesheet" href="Css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="Javascript/app.js" defer></script>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">⚔️</span>
+      <span class="logo-text">WARSTACK</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-section="overview">
+        <i class="fas fa-chart-line"></i>
+        <span>Vue d'ensemble</span>
+      </a>
+      <a href="#" class="nav-item" data-section="players">
+        <i class="fas fa-users"></i>
+        <span>Joueurs</span>
+      </a>
+      <a href="#" class="nav-item" data-section="tournament">
+        <i class="fas fa-trophy"></i>
+        <span>Tournoi</span>
+      </a>
+    </nav>
+    <div class="sidebar-status">
+      <div class="status-dot"></div>
+      <span>BOT ONLINE</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- HEADER -->
+    <header class="dash-header">
+      <h1 class="dash-title" id="section-title">Vue d'ensemble</h1>
+      <div class="dash-info">
+        <span id="current-time"></span>
+      </div>
+    </header>
+
+    <!-- SECTION OVERVIEW -->
+    <section id="overview" class="section active">
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon"><i class="fas fa-users"></i></div>
+          <div class="card-info">
+            <div class="card-value" id="total-players">—</div>
+            <div class="card-label">Joueurs inscrits</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon"><i class="fas fa-crosshairs"></i></div>
+          <div class="card-info">
+            <div class="card-value" id="total-kills">—</div>
+            <div class="card-label">Kills totaux</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="card-info">
+            <div class="card-value" id="best-kd">—</div>
+            <div class="card-label">Meilleur K/D</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon"><i class="fas fa-star"></i></div>
+          <div class="card-info">
+            <div class="card-value" id="mvp-name">—</div>
+            <div class="card-label">MVP actuel</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP 5 -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🏆 Top 5 Joueurs</h2>
+        </div>
+        <div class="panel-body" id="top5-list">
+          <div class="loading">Chargement...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION JOUEURS -->
+    <section id="players" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>👥 Tous les joueurs</h2>
+          <input type="text" id="search-player" placeholder="Rechercher..." class="search-input">
+        </div>
+        <div class="panel-body">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Pseudo BF6</th>
+                <th>Plateforme</th>
+                <th>K/D</th>
+                <th>Kills</th>
+                <th>Deaths</th>
+                <th>Wins</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="players-table">
+              <tr><td colspan="7" class="loading">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION TOURNOI -->
+    <section id="tournament" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>⚙️ Actions tournoi</h2>
+        </div>
+        <div class="panel-body">
+          <div class="actions-grid">
+            <button class="action-btn danger" id="btn-reset">
+              <i class="fas fa-redo"></i>
+              Reset classement
+            </button>
+            <button class="action-btn primary" id="btn-update">
+              <i class="fas fa-sync"></i>
+              Forcer mise à jour
+            </button>
+          </div>
+          <div id="action-feedback" class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL EDIT JOUEUR -->
+  <div class="modal" id="edit-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>✏️ Modifier le joueur</h3>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-discord-id">
+        <div class="form-group">
+          <label>Pseudo BF6</label>
+          <input type="text" id="edit-pseudo" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Kills</label>
+          <input type="number" id="edit-kills" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Deaths</label>
+          <input type="number" id="edit-deaths" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Wins</label>
+          <input type="number" id="edit-wins" class="form-input">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn danger" id="btn-cancel">Annuler</button>
+        <button class="action-btn primary" id="btn-save">Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

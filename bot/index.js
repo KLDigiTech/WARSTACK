@@ -7,6 +7,9 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const cron = require('node-cron');
+const { updateLeaderboard } = require('./jobs/leaderboard');
+const { postMVP } = require('./jobs/mvp');
 
 // --- Client Discord ---
 const client = new Client({
