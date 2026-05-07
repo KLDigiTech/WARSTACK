@@ -43,7 +43,10 @@ export async function initLogs() {
 
           </div>
 
-          <div class="toggle"></div>
+          <div
+            class="toggle"
+            id="toggle-delete"
+          ></div>
 
         </div>
 
@@ -61,7 +64,10 @@ export async function initLogs() {
 
           </div>
 
-          <div class="toggle"></div>
+          <div
+            class="toggle"
+            id="toggle-edit"
+          ></div>
 
         </div>
 
@@ -79,7 +85,10 @@ export async function initLogs() {
 
           </div>
 
-          <div class="toggle"></div>
+          <div
+            class="toggle"
+            id="toggle-sanctions"
+          ></div>
 
         </div>
 
@@ -88,4 +97,27 @@ export async function initLogs() {
     </div>
 
   `;
+
+  bindToggle('toggle-delete');
+  bindToggle('toggle-edit');
+  bindToggle('toggle-sanctions');
+}
+
+// ============================================
+// TOGGLE
+// ============================================
+
+function bindToggle(id) {
+
+  document
+    .getElementById(id)
+    .addEventListener(
+      'click',
+      () => {
+
+        document
+          .getElementById(id)
+          .classList.toggle('on');
+      }
+    );
 }

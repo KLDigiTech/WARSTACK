@@ -3,6 +3,16 @@ import {
   GUILD_ID
 } from '../config.js';
 
+import {
+  loadConfigs,
+  saveConfig,
+  getConfig
+} from '../services/configService.js';
+
+// ============================================
+// INIT
+// ============================================
+
 export async function initSettings() {
 
   document.getElementById(
@@ -25,13 +35,16 @@ export async function initSettings() {
               Langue
             </label>
 
-            <select class="form-select">
+            <select
+              id="settings-language"
+              class="form-select"
+            >
 
-              <option>
+              <option value="fr">
                 Français
               </option>
 
-              <option>
+              <option value="en">
                 English
               </option>
 
@@ -47,6 +60,7 @@ export async function initSettings() {
 
             <input
               type="text"
+              id="settings-prefix"
               class="form-input"
               placeholder="!"
             >
@@ -54,6 +68,17 @@ export async function initSettings() {
           </div>
 
         </div>
+
+      </div>
+
+      <div class="panel-footer">
+
+        <button
+          class="btn btn-primary"
+          id="save-settings"
+        >
+          Sauvegarder
+        </button>
 
       </div>
 
@@ -106,4 +131,69 @@ export async function initSettings() {
     </div>
 
   `;
+
+  // ============================================
+  // LOAD CONFIGS
+  // ============================================
+
+  const configs =
+    await loadConfigs();
+
+  document.getElementById(
+    'settings-language'
+  ).value =
+
+    getConfig(
+      configs,
+      'settings_language'
+    ) || 'fr';
+
+  document.getElementById(
+    'settings-prefix'
+  ).value =
+
+    getConfig(
+      configs,
+      'settings_prefix'
+    ) || '!';
+
+  // ============================================
+  // EVENTS
+  // ============================================
+
+  document
+    .getElementById('save-settings')
+    .addEventListener(
+      'click',
+      saveSettings
+    );
+}
+
+// ============================================
+// SAVE
+// ============================================
+
+async function saveSettings() {
+
+  await saveConfig(
+
+    'settings_language',
+
+    document.getElementById(
+      'settings-language'
+    ).value
+  );
+
+  await saveConfig(
+
+    'settings_prefix',
+
+    document.getElementById(
+      'settings-prefix'
+    ).value
+  );
+
+  alert(
+    '✅ Paramètres sauvegardés'
+  );
 }

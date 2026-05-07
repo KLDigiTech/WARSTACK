@@ -1,4 +1,8 @@
-import { fetchSupabase } from '../api.js';
+import {
+  loadConfigs,
+  saveConfig,
+  getConfig
+} from '../services/configService.js';
 
 // ============================================
 // INIT
@@ -85,31 +89,45 @@ export async function initWelcome() {
 
       </div>
 
+      <div class="panel-footer">
+
+        <button
+          class="btn btn-primary"
+          id="save-welcome"
+        >
+          Sauvegarder
+        </button>
+
+      </div>
+
     </div>
 
   `;
 
+  // ============================================
+  // LOAD CONFIGS
+  // ============================================
+
   const configs =
-    await fetchSupabase(
-      'config?select=*'
-    );
+    await loadConfigs();
 
   fillConfigs(configs);
+
+  // ============================================
+  // EVENTS
+  // ============================================
+
+  document
+    .getElementById('save-welcome')
+    .addEventListener(
+      'click',
+      saveWelcomeConfigs
+    );
 }
 
 // ============================================
 // HELPERS
 // ============================================
-
-function getConfig(
-  configs,
-  key
-) {
-
-  return configs?.find(
-    c => c.key === key
-  )?.value;
-}
 
 function fillConfigs(configs) {
 
@@ -148,4 +166,51 @@ function fillConfigs(configs) {
       configs,
       'leave_message'
     ) || '';
+}
+
+// ============================================
+// SAVE
+// ============================================
+
+async function saveWelcomeConfigs() {
+
+  await saveConfig(
+
+    'welcome_channel',
+
+    document.getElementById(
+      'welcome-channel'
+    ).value
+  );
+
+  await saveConfig(
+
+    'leave_channel',
+
+    document.getElementById(
+      'leave-channel'
+    ).value
+  );
+
+  await saveConfig(
+
+    'welcome_message',
+
+    document.getElementById(
+      'welcome-message'
+    ).value
+  );
+
+  await saveConfig(
+
+    'leave_message',
+
+    document.getElementById(
+      'leave-message'
+    ).value
+  );
+
+  alert(
+    '✅ Config sauvegardée'
+  );
 }

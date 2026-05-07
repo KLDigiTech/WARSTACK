@@ -13,7 +13,7 @@ export function createStatCard({
         <i class="${icon}"></i>
       </div>
 
-      <div class="card-info">
+      <div class="card-content">
 
         <div
           class="card-value"

@@ -1,10 +1,14 @@
 export function showConfirm({
 
   title = 'Confirmation',
+
   message = 'Continuer ?',
+
   confirmText = 'Confirmer',
+
   cancelText = 'Annuler',
-  onConfirm = () => {}
+
+  onConfirm = async () => {}
 
 }) {
 
@@ -69,10 +73,10 @@ export function showConfirm({
 
   document
     .getElementById('confirm-ok')
-    .onclick = () => {
+    .onclick = async () => {
 
       modal.classList.remove('show');
 
-      onConfirm();
+      await onConfirm();
     };
 }

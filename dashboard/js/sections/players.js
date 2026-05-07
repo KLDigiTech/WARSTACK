@@ -4,14 +4,26 @@ import {
   deleteSupabase
 } from '../api.js';
 
-import { createPanel }
-from '../components/panel.js';
+import {
+  createPanel
+} from '../components/panel.js';
 
-import { createTable }
-from '../components/table.js';
+import {
+  createTable
+} from '../components/table.js';
 
-import { createActionButtons }
-from '../components/actionButtons.js';
+import {
+  createActionButtons
+} from '../components/actionButtons.js';
+
+import {
+  openModal,
+  closeModal
+} from '../ui/modal.js';
+
+import {
+  showToast
+} from '../ui/toast.js';
 
 let allPlayers = [];
 
@@ -130,9 +142,11 @@ function renderPlayersTable(players) {
       <tr>
 
         <td>
+
           <strong>
             ${p.pseudo_bf6}
           </strong>
+
         </td>
 
         <td>
@@ -196,20 +210,89 @@ window.editPlayer = function(discordId) {
 
     );
 
-  if (!player) return;
+  if (!player) {
+    return;
+  }
 
-  const pseudo =
-    prompt(
-      'Modifier pseudo',
-      player.pseudo_bf6
+  openModal(
+
+    'Modifier joueur',
+
+    `
+
+      <div class="form-group">
+
+        <label>
+          Pseudo BF6
+        </label>
+
+        <input
+          type="text"
+          id="edit-player-pseudo"
+          class="form-input"
+          value="${player.pseudo_bf6}"
+        >
+
+      </div>
+
+      <div
+        style="
+          margin-top:20px;
+          display:flex;
+          justify-content:flex-end;
+          gap:10px;
+        "
+      >
+
+        <button
+          class="btn btn-secondary"
+          id="cancel-edit-player"
+        >
+          Annuler
+        </button>
+
+        <button
+          class="btn btn-primary"
+          id="save-edit-player"
+        >
+          Sauvegarder
+        </button>
+
+      </div>
+
+    `
+  );
+
+  document
+    .getElementById(
+      'cancel-edit-player'
+    )
+    .addEventListener(
+      'click',
+      closeModal
     );
 
-  if (!pseudo) return;
+  document
+    .getElementById(
+      'save-edit-player'
+    )
+    .addEventListener(
+      'click',
+      async () => {
 
-  updatePlayer(
-    discordId,
-    pseudo
-  );
+        const pseudo =
+          document.getElementById(
+            'edit-player-pseudo'
+          ).value;
+
+        await updatePlayer(
+          discordId,
+          pseudo
+        );
+
+        closeModal();
+      }
+    );
 };
 
 // ============================================
@@ -228,6 +311,10 @@ async function updatePlayer(
     {
       pseudo_bf6: pseudo
     }
+  );
+
+  showToast(
+    '✅ Joueur mis à jour'
   );
 
   initPlayers();
@@ -255,6 +342,10 @@ window.deletePlayer = async function(
 
   await deleteSupabase(
     `players?discord_id=eq.${discordId}`
+  );
+
+  showToast(
+    '✅ Joueur supprimé'
   );
 
   initPlayers();
