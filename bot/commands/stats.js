@@ -5,7 +5,7 @@
 
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const supabase = require('../services/supabase');
-const { getPlayerStats } = require('../services/gametools');
+const { getPlayerStats } = require('../services/tracker');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -21,11 +21,9 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
 
-    // Cible : joueur mentionné ou soi-même
     const target = interaction.options.getUser('joueur') || interaction.user;
     const discordId = target.id;
 
-    // Récupère le joueur en DB
     const { data: player } = await supabase
       .from('players')
       .select('*')
@@ -38,8 +36,8 @@ module.exports = {
       });
     }
 
-    // Récupère les stats depuis GameTools
-    const stats = await getPlayerStats(player.pseudo_bf6, player.platform);
+    // Platform → identifier (ordre correct pour tracker.gg)
+    const stats = await getPlayerStats(player.platform, player.pseudo_bf6);
 
     if (!stats) {
       return interaction.editReply({
@@ -47,20 +45,20 @@ module.exports = {
       });
     }
 
-    // Construction de l'embed
     const embed = new EmbedBuilder()
       .setTitle(`⚔️ ${player.pseudo_bf6}`)
       .setColor(0xFF6600)
       .setThumbnail(target.displayAvatarURL())
       .addFields(
-        { name: '🎯 Kills', value: `${stats.kills ?? '—'}`, inline: true },
-        { name: '💀 Deaths', value: `${stats.deaths ?? '—'}`, inline: true },
-        { name: '📈 K/D', value: `${stats.kd ?? '—'}`, inline: true },
-        { name: '🏆 Wins', value: `${stats.wins ?? '—'}`, inline: true },
-        { name: '🎮 Parties', value: `${stats.games ?? '—'}`, inline: true },
-        { name: '📱 Plateforme', value: `${player.platform.toUpperCase()}`, inline: true },
+        { name: '🎯 Kills', value: `\`${stats.kills ?? '—'}\``, inline: true },
+        { name: '💀 Deaths', value: `\`${stats.deaths ?? '—'}\``, inline: true },
+        { name: '📈 K/D', value: `\`${stats.kd ?? '—'}\``, inline: true },
+        { name: '🏆 Wins', value: `\`${stats.wins ?? '—'}\``, inline: true },
+        { name: '🎮 Parties', value: `\`${stats.games ?? '—'}\``, inline: true },
+        { name: '⏱️ Temps de jeu', value: `\`${stats.playtime ?? '—'}\``, inline: true },
+        { name: '📱 Plateforme', value: `\`${player.platform.toUpperCase()}\``, inline: true },
       )
-      .setFooter({ text: 'WARSTACK • Stats BF6' })
+      .setFooter({ text: 'WARSTACK • Stats BF6 via tracker.gg' })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
