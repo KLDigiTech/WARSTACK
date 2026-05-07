@@ -1,0 +1,68 @@
+/* components/buttons.css */
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 16px;
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  border:1px solid;
+  cursor:pointer;
+  transition:all .15s ease;
+  text-decoration:none;
+}
+
+.btn-primary{
+  background:rgba(0,255,65,.08);
+  color:var(--green);
+  border-color:var(--green-dim);
+}
+
+.btn-primary:hover{
+  background:rgba(0,255,65,.15);
+  border-color:var(--green);
+  box-shadow:0 0 12px rgba(0,255,65,.15);
+}
+
+.btn-secondary{
+  background:transparent;
+  color:var(--text-dim);
+  border-color:var(--border);
+}
+
+.btn-secondary:hover{
+  background:var(--surface-2);
+  color:var(--text);
+  border-color:rgba(74,124,89,.4);
+}
+
+.btn-danger{
+  background:transparent;
+  color:var(--red);
+  border-color:rgba(255,68,68,.3);
+}
+
+.btn-danger:hover{
+  background:rgba(255,68,68,.08);
+  border-color:var(--red);
+}
+
+.btn-orange{
+  background:rgba(255,107,53,.08);
+  color:var(--orange);
+  border-color:rgba(255,107,53,.3);
+}
+
+.btn-orange:hover{
+  background:rgba(255,107,53,.15);
+  border-color:var(--orange);
+}
+
+.btn-sm{
+  padding:4px 10px;
+  font-size:11px;
+}

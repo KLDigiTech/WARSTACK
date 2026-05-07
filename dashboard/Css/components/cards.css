@@ -1,0 +1,80 @@
+/* components/cards.css */
+
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  padding:18px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-width:0;
+  overflow:hidden;
+  position:relative;
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    background .18s ease;
+}
+
+.card::after{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(
+    to right,
+    transparent,
+    var(--green-dim),
+    transparent
+  );
+  opacity:0;
+  transition:opacity .2s ease;
+}
+
+.card:hover{
+  border-color:rgba(74,124,89,.5);
+  background:var(--surface-2);
+}
+
+.card:hover::after{
+  opacity:1;
+}
+
+.card-icon{
+  font-size:16px;
+  color:var(--green-dim);
+  width:34px;
+  height:34px;
+  border:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.card-value{
+  font-size:30px;
+  font-weight:700;
+  color:#00ff66;
+  letter-spacing:2px;
+  line-height:1;
+  text-shadow:0 0 12px rgba(0,255,100,.45);
+}
+
+.card-label{
+  font-size:11px;
+  letter-spacing:2px;
+  color:#d8ffe2;
+  text-transform:uppercase;
+  margin-top:5px;
+  font-weight:700;
+  opacity:.92;
+}
+
+.card-content{
+  flex:1;
+  min-width:0;
+}

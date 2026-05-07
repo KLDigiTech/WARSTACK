@@ -1,3 +1,7 @@
+// ============================================
+// app.js
+// ============================================
+
 import { initModal } from './ui/modal.js';
 
 import { $ } from './utils/dom.js';
@@ -6,10 +10,14 @@ import {
   getBotStatus
 } from './services/botService.js';
 
+import {
+  getUserPermissions
+} from './services/permissionService.js';
+
 console.log('WARSTACK Dashboard Loaded');
 
 // ============================================
-// HELPERS
+// INIT
 // ============================================
 
 initModal();
@@ -26,7 +34,10 @@ function updateClock() {
     `${now.toLocaleTimeString('fr-FR')} — ${now.toLocaleDateString('fr-FR')}`;
 }
 
-setInterval(updateClock, 1000);
+setInterval(
+  updateClock,
+  1000
+);
 
 updateClock();
 
@@ -36,28 +47,42 @@ updateClock();
 
 async function checkBotStatus() {
 
-  const data =
-    await getBotStatus();
+  try {
 
-  const dot =
-    $('#status-dot');
+    const data =
+      await getBotStatus();
 
-  const label =
-    $('#status-label');
+    const dot =
+      $('#status-dot');
 
-  if (data?.status === 'online') {
+    const label =
+      $('#status-label');
 
-    dot?.classList.add('online');
+    if (data?.status === 'online') {
 
-    label.textContent =
-      'BOT ONLINE';
+      dot?.classList.add(
+        'online'
+      );
 
-  } else {
+      label.textContent =
+        'BOT ONLINE';
 
-    dot?.classList.remove('online');
+    } else {
 
-    label.textContent =
-      'BOT OFFLINE';
+      dot?.classList.remove(
+        'online'
+      );
+
+      label.textContent =
+        'BOT OFFLINE';
+    }
+
+  } catch (err) {
+
+    console.error(
+      'Bot status error:',
+      err
+    );
   }
 }
 
@@ -130,6 +155,10 @@ const sections = {
     (await import('./sections/channels.js'))
       .initChannels(),
 
+  access: async () =>
+    (await import('./sections/access.js'))
+      .initAccess(),
+
   settings: async () =>
     (await import('./sections/settings.js'))
       .initSettings()
@@ -143,18 +172,29 @@ async function navigate(section) {
 
   document
     .querySelectorAll('.nav-item')
-    .forEach(i => i.classList.remove('active'));
+    .forEach(item => {
 
-  const item = document.querySelector(
-    `[data-section="${section}"]`
+      item.classList.remove(
+        'active'
+      );
+    });
+
+  const item =
+    document.querySelector(
+      `[data-section="${section}"]`
+    );
+
+  if (!item) {
+    return;
+  }
+
+  item.classList.add(
+    'active'
   );
 
-  if (!item) return;
-
-  item.classList.add('active');
-
   $('#section-title').textContent =
-    item.querySelector('span').textContent;
+    item.querySelector('span')
+      ?.textContent || '';
 
   const render =
     sections[section];
@@ -162,9 +202,11 @@ async function navigate(section) {
   if (render) {
 
     $('#section-content').innerHTML = `
+
       <div class="loading-screen">
         CHARGEMENT...
       </div>
+
     `;
 
     await render();
@@ -174,32 +216,134 @@ async function navigate(section) {
     section;
 }
 
+// ============================================
+// PERMISSIONS
+// ============================================
+
+async function applyPermissions() {
+
+  try {
+
+    const permissions =
+      await getUserPermissions();
+
+    console.log(
+      'Permissions:',
+      permissions
+    );
+
+    // SI aucune permission => tout afficher
+    if (
+      !permissions ||
+      permissions.length === 0
+    ) {
+
+      console.warn(
+        'Aucune permission trouvée'
+      );
+
+      document
+        .querySelectorAll('.nav-item')
+        .forEach(item => {
+
+          item.style.display =
+            'flex';
+        });
+
+      return;
+    }
+
+    document
+      .querySelectorAll('.nav-item')
+      .forEach(item => {
+
+        const section =
+          item.dataset.section;
+
+        if (!section) {
+          return;
+        }
+
+        // overview toujours visible
+        if (section === 'overview') {
+
+          item.style.display =
+            'flex';
+
+          return;
+        }
+
+        const hasPermission =
+          permissions.includes(
+            section
+          );
+
+        item.style.display =
+          hasPermission
+            ? 'flex'
+            : 'none';
+      });
+
+  } catch (err) {
+
+    console.error(
+      'Permissions error:',
+      err
+    );
+
+    // sécurité => tout afficher
+    document
+      .querySelectorAll('.nav-item')
+      .forEach(item => {
+
+        item.style.display =
+          'flex';
+      });
+  }
+}
+
+// ============================================
+// NAV EVENTS
+// ============================================
+
 document
   .querySelectorAll('.nav-item')
   .forEach(item => {
 
     item.addEventListener(
       'click',
-      (e) => {
+      async (e) => {
 
         e.preventDefault();
 
-        navigate(
-          item.dataset.section
+        const section =
+          item.dataset.section;
+
+        await navigate(
+          section
         );
       }
     );
   });
 
 // ============================================
-// INIT
+// INIT DASHBOARD
 // ============================================
 
-const initialSection =
+async function initDashboard() {
 
-  window.location.hash
-    ?.replace('#', '')
+  await applyPermissions();
 
-  || 'overview';
+  const initialSection =
 
-navigate(initialSection);
+    window.location.hash
+      ?.replace('#', '')
+
+    || 'overview';
+
+  await navigate(
+    initialSection
+  );
+}
+
+initDashboard();

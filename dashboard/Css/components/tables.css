@@ -1,0 +1,33 @@
+/* components/tables.css */
+
+.data-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+.data-table th{
+  text-align:left;
+  padding:8px 12px;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--text-muted);
+  border-bottom:1px solid var(--border);
+}
+
+.data-table td{
+  padding:10px 12px;
+  border-bottom:1px solid rgba(74,124,89,.08);
+  letter-spacing:1px;
+  vertical-align:middle;
+}
+
+.data-table tr:last-child td{
+  border-bottom:none;
+}
+
+.data-table tr:hover td{
+  background:var(--green-glow);
+}
