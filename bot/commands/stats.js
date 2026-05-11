@@ -52,12 +52,11 @@ module.exports = {
     }
 
     // Calcul score WARSTACK
-    const kd       = parseFloat(snapshot.kd)      || 0;
-    const winrate  = parseFloat(snapshot.winrate?.replace('%','')) || 0;
-    const kills    = parseInt(snapshot.kills)      || 0;
-    const games    = parseInt(snapshot.games)      || 1;
-    const kpm      = games > 0 ? (kills / games).toFixed(2) : 0;
-    const score    = ((kd * 30) + (winrate * 35 / 100) + (parseFloat(kpm) * 25)).toFixed(2);
+    const kd = parseFloat(snapshot.kd) || 0;
+    const winrate = parseFloat(snapshot.winrate) || 0; const kills = parseInt(snapshot.kills) || 0;
+    const games = parseInt(snapshot.games) || 1;
+    const kpm = games > 0 ? (kills / games).toFixed(2) : 0;
+    const score = ((kd * 30) + (winrate * 35 / 100) + (parseFloat(kpm) * 25)).toFixed(2);
 
     // Division
     function getDivision(score) {
