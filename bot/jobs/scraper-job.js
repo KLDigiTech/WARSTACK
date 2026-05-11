@@ -20,7 +20,6 @@ async function sleep(ms) {
 async function runScraper() {
   console.log('🚀 Démarrage du scraper WARSTACK...');
 
-  // Récupère tous les joueurs avec un tracker_id
   const { data: players, error } = await supabase
     .from('players')
     .select('discord_id, tracker_id, username')
@@ -44,17 +43,16 @@ async function runScraper() {
       continue;
     }
 
-    // Sauvegarde le snapshot
     const { error: snapError } = await supabase
       .from('player_snapshots')
       .insert({
         tracker_id  : player.tracker_id,
-        kills       : stats.kills,
-        deaths      : stats.deaths,
-        kd          : stats.kd,
-        wins        : stats.wins,
-        winrate     : stats.winrate,
-        games       : stats.games,
+        kills       : parseInt(String(stats.kills).replace(/,/g, ''))    || 0,
+        deaths      : parseInt(String(stats.deaths).replace(/,/g, ''))   || 0,
+        kd          : parseFloat(stats.kd)                               || 0,
+        wins        : parseInt(String(stats.wins).replace(/,/g, ''))     || 0,
+        winrate     : parseFloat(String(stats.winrate).replace('%', '')) || 0,
+        games       : parseInt(String(stats.games).replace(/,/g, ''))    || 0,
         playtime    : stats.playtime,
         snapshot_at : new Date().toISOString(),
       });
@@ -65,7 +63,6 @@ async function runScraper() {
       console.log(`✅ Snapshot sauvegardé — K/D: ${stats.kd} | Kills: ${stats.kills}`);
     }
 
-    // Rate limit — 10 secondes entre chaque joueur
     await sleep(10000);
   }
 
