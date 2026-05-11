@@ -23,7 +23,6 @@ module.exports = {
     const target = interaction.options.getUser('joueur') || interaction.user;
     const discordId = target.id;
 
-    // Récupère le joueur
     const { data: player } = await supabase
       .from('players')
       .select('*')
@@ -36,7 +35,6 @@ module.exports = {
       });
     }
 
-    // Récupère le dernier snapshot
     const { data: snapshot } = await supabase
       .from('player_snapshots')
       .select('*')
@@ -52,13 +50,22 @@ module.exports = {
     }
 
     // Calcul score WARSTACK
-    const kd = parseFloat(snapshot.kd) || 0;
-    const winrate = parseFloat(snapshot.winrate) || 0; const kills = parseInt(snapshot.kills) || 0;
-    const games = parseInt(snapshot.games) || 1;
-    const kpm = games > 0 ? (kills / games).toFixed(2) : 0;
-    const score = ((kd * 30) + (winrate * 35 / 100) + (parseFloat(kpm) * 25)).toFixed(2);
+    const kd      = parseFloat(snapshot.kd)      || 0;
+    const winrate = parseFloat(snapshot.winrate) || 0;
+    const kills   = parseInt(snapshot.kills)     || 0;
+    const games   = parseInt(snapshot.games)     || 1;
+    const kpm     = kills / games;
 
-    // Division
+    const kd_score      = Math.min(kd / 5, 1) * 100;
+    const winrate_score = Math.min(winrate / 60, 1) * 100;
+    const kpm_score     = Math.min(kpm / 20, 1) * 100;
+
+    const score = (
+      (kd_score * 0.30) +
+      (winrate_score * 0.35) +
+      (kpm_score * 0.25)
+    ).toFixed(2);
+
     function getDivision(score) {
       const s = parseFloat(score);
       if (s >= 65) return { name: 'WARSTACK', emoji: '🔱' };
@@ -84,7 +91,7 @@ module.exports = {
         { name: '📈 K/D', value: `\`${snapshot.kd ?? '—'}\``, inline: true },
         { name: '🏆 Wins', value: `\`${snapshot.wins ?? '—'}\``, inline: true },
         { name: '🎮 Parties', value: `\`${snapshot.games ?? '—'}\``, inline: true },
-        { name: '🏳️ Win Rate', value: `\`${snapshot.winrate ?? '—'}\``, inline: true },
+        { name: '🏳️ Win Rate', value: `\`${snapshot.winrate ?? '—'}%\``, inline: true },
         { name: '⏱️ Temps de jeu', value: `\`${snapshot.playtime ?? '—'}\``, inline: true },
         { name: '🔗 Tracker ID', value: `\`${player.tracker_id}\``, inline: true },
       )

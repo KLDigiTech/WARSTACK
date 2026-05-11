@@ -26,6 +26,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check pour UptimeRobot
+app.get('/', (req, res) => res.status(200).send('WARSTACK OK'));
+
 // Routes API
 app.use('/api', apiRouter);
 
