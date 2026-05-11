@@ -69,33 +69,48 @@ module.exports = {
     function getDivision(score) {
       const s = parseFloat(score);
       if (s >= 65) return { name: 'WARSTACK', emoji: '🔱' };
-      if (s >= 55) return { name: 'Phantom', emoji: '👻' };
-      if (s >= 45) return { name: 'Elite', emoji: '💎' };
-      if (s >= 35) return { name: 'Veteran', emoji: '🎖️' };
-      if (s >= 25) return { name: 'Grunt', emoji: '⚔️' };
-      return { name: 'Recruit', emoji: '🪖' };
+      if (s >= 55) return { name: 'Phantom',  emoji: '👻' };
+      if (s >= 45) return { name: 'Elite',    emoji: '💎' };
+      if (s >= 35) return { name: 'Veteran',  emoji: '🎖️' };
+      if (s >= 25) return { name: 'Grunt',    emoji: '⚔️' };
+      return             { name: 'Recruit',   emoji: '🪖' };
+    }
+
+    function getDivisionColor(name) {
+      const colors = {
+        'WARSTACK': 0xFF0000,
+        'Phantom' : 0x9B59B6,
+        'Elite'   : 0x00BFFF,
+        'Veteran' : 0xFF6600,
+        'Grunt'   : 0x95A5A6,
+        'Recruit' : 0x607D8B,
+      };
+      return colors[name] || 0xFF6600;
     }
 
     const division = getDivision(score);
 
     const embed = new EmbedBuilder()
-      .setTitle(`⚔️ ${player.username || target.username}`)
-      .setColor(0xFF6600)
+      .setAuthor({ name: 'WARSTACK • Stats BF6' })
+      .setTitle(`${division.emoji}  ${player.username || target.username}`)
+      .setDescription(`**${division.name}** — Score \`${score}\``)
+      .setColor(getDivisionColor(division.name))
       .setThumbnail(target.displayAvatarURL())
       .addFields(
-        { name: '🏅 Division', value: `${division.emoji} **${division.name}**`, inline: true },
-        { name: '📊 Score WARSTACK', value: `\`${score}\``, inline: true },
-        { name: '\u200b', value: '\u200b', inline: true },
-        { name: '🎯 Kills', value: `\`${snapshot.kills ?? '—'}\``, inline: true },
-        { name: '💀 Deaths', value: `\`${snapshot.deaths ?? '—'}\``, inline: true },
-        { name: '📈 K/D', value: `\`${snapshot.kd ?? '—'}\``, inline: true },
-        { name: '🏆 Wins', value: `\`${snapshot.wins ?? '—'}\``, inline: true },
-        { name: '🎮 Parties', value: `\`${snapshot.games ?? '—'}\``, inline: true },
-        { name: '🏳️ Win Rate', value: `\`${snapshot.winrate ?? '—'}%\``, inline: true },
-        { name: '⏱️ Temps de jeu', value: `\`${snapshot.playtime ?? '—'}\``, inline: true },
-        { name: '🔗 Tracker ID', value: `\`${player.tracker_id}\``, inline: true },
+        { name: '​', value: '**── COMBAT ──**', inline: false },
+        { name: '🎯 Kills',   value: `\`${Number(snapshot.kills).toLocaleString('fr-FR')}\``,  inline: true },
+        { name: '💀 Deaths',  value: `\`${Number(snapshot.deaths).toLocaleString('fr-FR')}\``, inline: true },
+        { name: '📈 K/D',     value: `\`${snapshot.kd}\``,                                     inline: true },
+        { name: '​', value: '**── VICTOIRES ──**', inline: false },
+        { name: '🏆 Wins',    value: `\`${snapshot.wins}\``,     inline: true },
+        { name: '🎮 Parties', value: `\`${snapshot.games}\``,    inline: true },
+        { name: '🏳️ Win Rate',value: `\`${snapshot.winrate}%\``, inline: true },
+        { name: '​', value: '**── GÉNÉRAL ──**', inline: false },
+        { name: '⏱️ Temps de jeu', value: `\`${snapshot.playtime}\``,   inline: true },
+        { name: '🔗 Tracker ID',   value: `\`${player.tracker_id}\``,   inline: true },
+        { name: '📅 Mis à jour',   value: `\`${new Date(snapshot.snapshot_at).toLocaleDateString('fr-FR')}\``, inline: true },
       )
-      .setFooter({ text: `WARSTACK • Mis à jour : ${new Date(snapshot.snapshot_at).toLocaleDateString('fr-FR')}` })
+      .setFooter({ text: 'WARSTACK • Battlefield 6 Stats' })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
