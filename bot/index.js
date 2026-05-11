@@ -12,6 +12,7 @@ const { updateLeaderboard } = require('./jobs/leaderboard');
 const { postMVP } = require('./jobs/mvp');
 const express = require('express');
 const apiRouter = require('./api');
+const https = require('https');
 
 // Serveur Express
 const app = express();
@@ -32,6 +33,11 @@ app.use('/api', apiRouter);
 app.listen(process.env.PORT || 3000, () => {
   console.log('✅ API WARSTACK démarrée');
 });
+
+// Keep-alive — empêche Render de s'endormir
+setInterval(() => {
+  https.get('https://warstack-bot.onrender.com', () => {}).on('error', () => {});
+}, 4 * 60 * 1000);
 
 // --- Client Discord ---
 const client = new Client({
