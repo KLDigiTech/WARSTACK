@@ -3,6 +3,7 @@
 // ============================================
 
 import { fetchSupabase, updateSupabase, insertSupabase, callBotAPI } from '../api.js';
+import { showConfirm } from '../ui/confirm.js';
 
 export async function initTournament() {
   document.getElementById('section-content').innerHTML = `
@@ -43,11 +44,11 @@ export async function initTournament() {
 
 async function loadTab(tab) {
   switch (tab) {
-    case 'tournoi': return loadTournoi();
-    case 'inscrits': return loadInscrits();
+    case 'tournoi':     return loadTournoi();
+    case 'inscrits':    return loadInscrits();
     case 'soumissions': return loadSoumissions();
-    case 'scoreboard': return loadScoreboard();
-    case 'outils': return loadOutils();
+    case 'scoreboard':  return loadScoreboard();
+    case 'outils':      return loadOutils();
   }
 }
 
@@ -114,32 +115,26 @@ async function loadTournoi() {
         <div style="font-size:10px; letter-spacing:3px; color:var(--green-dim); font-weight:700; margin-bottom:20px;">➕ CRÉER UN TOURNOI</div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-
           <div class="form-group" style="grid-column: 1 / -1;">
             <label>Nom du tournoi</label>
             <input type="text" id="t-nom" class="form-input" placeholder="ex: Tournoi PöF — Saison 1">
           </div>
-
           <div class="form-group">
             <label>Date de début</label>
             <input type="date" id="t-start" class="form-input">
           </div>
-
           <div class="form-group">
             <label>Date de fin</label>
             <input type="date" id="t-end" class="form-input">
           </div>
-
           <div class="form-group">
             <label>Max joueurs <span style="color:var(--text-muted)">(0 = illimité)</span></label>
             <input type="number" id="t-max" class="form-input" value="0" min="0">
           </div>
-
           <div class="form-group" style="grid-column: 1 / -1;">
             <label>Description <span style="color:var(--text-muted)">(optionnel)</span></label>
             <textarea id="t-desc" class="form-textarea" placeholder="Règles, format, informations..."></textarea>
           </div>
-
         </div>
 
         <div style="margin-top:24px; display:flex; align-items:center; gap:16px;">
@@ -178,12 +173,7 @@ async function loadTournoi() {
         <div style="font-size:10px; letter-spacing:3px; color:var(--text-muted); font-weight:700; margin-bottom:16px;">📁 HISTORIQUE</div>
         <table class="data-table">
           <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Début</th>
-              <th>Fin</th>
-              <th>Statut</th>
-            </tr>
+            <tr><th>Nom</th><th>Début</th><th>Fin</th><th>Statut</th></tr>
           </thead>
           <tbody>
             ${archives.map(t => `
@@ -206,18 +196,18 @@ async function loadTournoi() {
 
   if (actif) {
     document.getElementById('btn-terminer')?.addEventListener('click', () => terminerTournoi(actif.id));
-    document.getElementById('btn-annuler')?.addEventListener('click', () => changerStatut(actif.id, 'annule'));
+    document.getElementById('btn-annuler')?.addEventListener('click', () => annulerTournoi(actif.id));
   } else {
     document.getElementById('btn-create-tournoi')?.addEventListener('click', creerTournoi);
   }
 }
 
 async function creerTournoi() {
-  const nom = document.getElementById('t-nom').value.trim();
+  const nom   = document.getElementById('t-nom').value.trim();
   const start = document.getElementById('t-start').value;
-  const end = document.getElementById('t-end').value;
-  const max = parseInt(document.getElementById('t-max').value) || 0;
-  const desc = document.getElementById('t-desc').value.trim();
+  const end   = document.getElementById('t-end').value;
+  const max   = parseInt(document.getElementById('t-max').value) || 0;
+  const desc  = document.getElementById('t-desc').value.trim();
 
   if (!nom || !start || !end) {
     setFeedback('❌ Remplis tous les champs obligatoires.'); return;
@@ -226,13 +216,13 @@ async function creerTournoi() {
   setFeedback('Création en cours...');
 
   await insertSupabase('tournaments', {
-    name: nom,
-    start_date: start,
-    end_date: end,
-    max_players: max || null,
-    description: desc || null,
-    status: 'active',
-    created_at: new Date().toISOString()
+    name        : nom,
+    start_date  : start,
+    end_date    : end,
+    max_players : max || null,
+    description : desc || null,
+    status      : 'active',
+    created_at  : new Date().toISOString()
   });
 
   setFeedback('✅ Tournoi créé !');
@@ -240,10 +230,31 @@ async function creerTournoi() {
 }
 
 async function terminerTournoi(id) {
-  if (!confirm('Terminer ce tournoi ?')) return;
-  await changerStatut(id, 'termine');
-  setFeedback('✅ Tournoi terminé.');
-  loadTournoi();
+  showConfirm({
+    title       : '🏁 Terminer le tournoi',
+    message     : 'Es-tu sûr de vouloir terminer ce tournoi ? Cette action est irréversible.',
+    confirmText : 'Terminer',
+    cancelText  : 'Annuler',
+    onConfirm   : async () => {
+      await changerStatut(id, 'termine');
+      setFeedback('✅ Tournoi terminé.');
+      loadTournoi();
+    }
+  });
+}
+
+async function annulerTournoi(id) {
+  showConfirm({
+    title       : '❌ Annuler le tournoi',
+    message     : 'Es-tu sûr de vouloir annuler ce tournoi ?',
+    confirmText : 'Annuler le tournoi',
+    cancelText  : 'Retour',
+    onConfirm   : async () => {
+      await changerStatut(id, 'annule');
+      setFeedback('✅ Tournoi annulé.');
+      loadTournoi();
+    }
+  });
 }
 
 async function changerStatut(id, statut) {
@@ -269,7 +280,7 @@ async function loadInscrits() {
     container.innerHTML = '<p>Aucun inscrit pour l\'instant.</p>'; return;
   }
 
-  let html = `
+  container.innerHTML = `
     <div class="card">
       <h3>👥 Inscrits — ${actif.name} (${entries.length})</h3>
       <table class="data-table">
@@ -287,15 +298,20 @@ async function loadInscrits() {
       </table>
     </div>
   `;
-
-  container.innerHTML = html;
 }
 
-window.expulserJoueur = async function (id) {
-  if (!confirm('Expulser ce joueur ?')) return;
-  await updateSupabase(`tournament_entries?id=eq.${id}`, { status: 'expelled' });
-  setFeedback('✅ Joueur expulsé.');
-  loadInscrits();
+window.expulserJoueur = function(id) {
+  showConfirm({
+    title       : '❌ Expulser le joueur',
+    message     : 'Confirmes-tu l\'expulsion de ce joueur du tournoi ?',
+    confirmText : 'Expulser',
+    cancelText  : 'Annuler',
+    onConfirm   : async () => {
+      await updateSupabase(`tournament_entries?id=eq.${id}`, { status: 'expelled' });
+      setFeedback('✅ Joueur expulsé.');
+      loadInscrits();
+    }
+  });
 };
 
 // ============================================
@@ -355,13 +371,13 @@ async function loadSoumissions() {
   container.innerHTML = html;
 }
 
-window.validerSub = async function (id) {
+window.validerSub = async function(id) {
   await updateSupabase(`tournament_submissions?id=eq.${id}`, { status: 'validated' });
   setFeedback('✅ Soumission validée.');
   loadSoumissions();
 };
 
-window.rejeterSub = async function (id) {
+window.rejeterSub = async function(id) {
   await updateSupabase(`tournament_submissions?id=eq.${id}`, { status: 'rejected' });
   setFeedback('❌ Soumission rejetée.');
   loadSoumissions();
@@ -387,7 +403,7 @@ async function loadScoreboard() {
 
   const podium = ['🥇', '🥈', '🥉'];
 
-  let html = `
+  container.innerHTML = `
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <h3>🏆 Scoreboard — ${actif.name}</h3>
@@ -410,11 +426,9 @@ async function loadScoreboard() {
       </table>
     </div>
   `;
-
-  container.innerHTML = html;
 }
 
-window.refreshScoreboard = function () { loadScoreboard(); };
+window.refreshScoreboard = function() { loadScoreboard(); };
 
 // ============================================
 // ONGLET OUTILS
@@ -450,14 +464,21 @@ async function loadOutils() {
     setFeedback(d?.success ? '✅ MVP publié' : '❌ Erreur bot');
   });
 
-  document.getElementById('btn-reset').addEventListener('click', async () => {
-    if (!confirm('Reset tout le classement ?')) return;
-    setFeedback('Reset en cours...');
-    const players = await fetchSupabase('players?select=discord_id');
-    for (const p of players) {
-      await updateSupabase(`players?discord_id=eq.${p.discord_id}`, { kills: 0, deaths: 0, kd: 0, wins: 0 });
-    }
-    setFeedback('✅ Classement reset');
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    showConfirm({
+      title       : '⚠️ Reset classement',
+      message     : 'Cette action va remettre à zéro tous les kills, deaths, K/D et wins. Continuer ?',
+      confirmText : 'Reset',
+      cancelText  : 'Annuler',
+      onConfirm   : async () => {
+        setFeedback('Reset en cours...');
+        const players = await fetchSupabase('players?select=discord_id');
+        for (const p of players) {
+          await updateSupabase(`players?discord_id=eq.${p.discord_id}`, { kills: 0, deaths: 0, kd: 0, wins: 0 });
+        }
+        setFeedback('✅ Classement reset');
+      }
+    });
   });
 }
 
