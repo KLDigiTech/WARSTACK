@@ -42,3 +42,42 @@
   gap:8px;
   background:rgba(0,255,65,.01);
 }
+
+/* TABS */
+.panel-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.tab-btn:hover {
+  border-color: var(--green-dim);
+  color: var(--text-dim);
+}
+
+.tab-btn.active {
+  background: var(--green-glow);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.tab-content {
+  display: block;
+}
+
+.tab-content.hidden {
+  display: none;
+}
