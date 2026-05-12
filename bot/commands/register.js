@@ -21,9 +21,9 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
 
-    const url = interaction.options.getString('url');
+    const url       = interaction.options.getString('url');
     const discordId = interaction.user.id;
-    const username = interaction.user.username;
+    const username  = interaction.user.username;
 
     const match = url.match(/tracker\.gg\/bf6\/profile\/(\d+)/);
     if (!match) {
@@ -43,7 +43,11 @@ module.exports = {
     if (existing) {
       await supabase
         .from('players')
-        .update({ tracker_id: trackerId, tracker_url: url })
+        .update({ 
+          tracker_id  : trackerId, 
+          tracker_url : url,
+          username    : username,
+        })
         .eq('discord_id', discordId);
 
       return interaction.editReply({
@@ -54,10 +58,10 @@ module.exports = {
     const { error } = await supabase
       .from('players')
       .insert({
-        discord_id: discordId,
-        username: username,
-        tracker_id: trackerId,
-        tracker_url: url,
+        discord_id  : discordId,
+        username    : username,
+        tracker_id  : trackerId,
+        tracker_url : url,
       });
 
     if (error) {
@@ -75,12 +79,12 @@ module.exports = {
       if (!stats) return;
       await supabase.from('player_snapshots').insert({
         tracker_id  : trackerId,
-        kills       : stats.kills,
-        deaths      : stats.deaths,
-        kd          : stats.kd,
-        wins        : stats.wins,
-        winrate     : stats.winrate,
-        games       : stats.games,
+        kills       : parseInt(String(stats.kills).replace(/,/g, ''))    || 0,
+        deaths      : parseInt(String(stats.deaths).replace(/,/g, ''))   || 0,
+        kd          : parseFloat(stats.kd)                               || 0,
+        wins        : parseInt(String(stats.wins).replace(/,/g, ''))     || 0,
+        winrate     : parseFloat(String(stats.winrate).replace('%', '')) || 0,
+        games       : parseInt(String(stats.games).replace(/,/g, ''))    || 0,
         playtime    : stats.playtime,
         snapshot_at : new Date().toISOString(),
       });
