@@ -1,3 +1,7 @@
+// ============================================
+// SECTION — tournament.js
+// ============================================
+
 import { fetchSupabase, updateSupabase, insertSupabase, callBotAPI } from '../api.js';
 
 export async function initTournament() {
@@ -48,7 +52,7 @@ async function loadTab(tab) {
 }
 
 // ============================================
-// ONGLET TOURNOI — Créer / Gérer
+// ONGLET TOURNOI
 // ============================================
 async function loadTournoi() {
   const container = document.getElementById('tab-tournoi');
@@ -64,6 +68,7 @@ async function loadTournoi() {
       <div class="card card-orange">
         <h3>🟢 Tournoi en cours : ${actif.name}</h3>
         <p>📅 Du <strong>${formatDate(actif.start_date)}</strong> au <strong>${formatDate(actif.end_date)}</strong></p>
+        ${actif.description ? `<p>📝 ${actif.description}</p>` : ''}
         <p>👥 Max joueurs : <strong>${actif.max_players || '∞'}</strong></p>
         <p>📊 Statut : <strong>${actif.status}</strong></p>
         <div class="actions-grid" style="margin-top:12px">
@@ -76,35 +81,53 @@ async function loadTournoi() {
     html += `
       <div class="card">
         <h3>➕ Créer un tournoi</h3>
-        <div class="form-group">
-          <label>Nom du tournoi</label>
-          <input type="text" id="t-nom" class="form-control" placeholder="ex: Tournoi PöF Saison 1">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:12px;">
+          <div class="form-group full">
+            <label>Nom du tournoi</label>
+            <input type="text" id="t-nom" class="form-input" placeholder="ex: Tournoi PöF Saison 1">
+          </div>
+          <div class="form-group">
+            <label>Date de début</label>
+            <input type="date" id="t-start" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Date de fin</label>
+            <input type="date" id="t-end" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Max joueurs (0 = illimité)</label>
+            <input type="number" id="t-max" class="form-input" value="0" min="0">
+          </div>
+          <div class="form-group full">
+            <label>Description (optionnel)</label>
+            <textarea id="t-desc" class="form-textarea" placeholder="Règles, infos..."></textarea>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Date de début</label>
-          <input type="date" id="t-start" class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Date de fin</label>
-          <input type="date" id="t-end" class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Max joueurs (0 = illimité)</label>
-          <input type="number" id="t-max" class="form-control" value="0" min="0">
-        </div>
-        <button class="btn btn-primary" id="btn-create-tournoi">🏆 Créer le tournoi</button>
+        <button class="btn btn-primary" id="btn-create-tournoi" style="margin-top:16px;">🏆 Créer le tournoi</button>
       </div>
     `;
   }
 
-  // Historique
   const archives = tournois?.filter(t => t.status !== 'active') || [];
   if (archives.length) {
-    html += `<div class="card" style="margin-top:16px"><h3>📁 Historique</h3><table class="data-table"><thead><tr><th>Nom</th><th>Début</th><th>Fin</th><th>Statut</th></tr></thead><tbody>`;
-    archives.forEach(t => {
-      html += `<tr><td>${t.name}</td><td>${formatDate(t.start_date)}</td><td>${formatDate(t.end_date)}</td><td>${t.status}</td></tr>`;
-    });
-    html += `</tbody></table></div>`;
+    html += `
+      <div class="card" style="margin-top:16px">
+        <h3>📁 Historique</h3>
+        <table class="data-table">
+          <thead><tr><th>Nom</th><th>Début</th><th>Fin</th><th>Statut</th></tr></thead>
+          <tbody>
+            ${archives.map(t => `
+              <tr>
+                <td>${t.name}</td>
+                <td>${formatDate(t.start_date)}</td>
+                <td>${formatDate(t.end_date)}</td>
+                <td>${t.status}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
   }
 
   container.innerHTML = html;
@@ -122,9 +145,10 @@ async function creerTournoi() {
   const start = document.getElementById('t-start').value;
   const end   = document.getElementById('t-end').value;
   const max   = parseInt(document.getElementById('t-max').value) || 0;
+  const desc  = document.getElementById('t-desc').value.trim();
 
   if (!nom || !start || !end) {
-    setFeedback('❌ Remplis tous les champs.'); return;
+    setFeedback('❌ Remplis tous les champs obligatoires.'); return;
   }
 
   setFeedback('Création en cours...');
@@ -134,6 +158,7 @@ async function creerTournoi() {
     start_date  : start,
     end_date    : end,
     max_players : max || null,
+    description : desc || null,
     status      : 'active',
     created_at  : new Date().toISOString()
   });
@@ -153,16 +178,6 @@ async function changerStatut(id, statut) {
   await updateSupabase(`tournaments?id=eq.${id}`, { status: statut });
   loadTournoi();
 }
-
-function formatDate(d) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString('fr-FR');
-}
-
-function setFeedback(msg) {
-  document.getElementById('tournament-feedback').textContent = msg;
-}
-
 
 // ============================================
 // ONGLET INSCRITS
@@ -188,20 +203,19 @@ async function loadInscrits() {
       <table class="data-table">
         <thead><tr><th>Joueur</th><th>Discord ID</th><th>Inscrit le</th><th>Action</th></tr></thead>
         <tbody>
+          ${entries.map(e => `
+            <tr>
+              <td>${e.username || '—'}</td>
+              <td><code>${e.discord_id}</code></td>
+              <td>${formatDate(e.created_at)}</td>
+              <td><button class="btn btn-danger btn-sm" onclick="expulserJoueur('${e.id}')">❌ Expulser</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
   `;
 
-  entries.forEach(e => {
-    html += `
-      <tr>
-        <td>${e.username || '—'}</td>
-        <td><code>${e.discord_id}</code></td>
-        <td>${formatDate(e.created_at)}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="expulserJoueur('${e.id}')">❌ Expulser</button></td>
-      </tr>
-    `;
-  });
-
-  html += `</tbody></table></div>`;
   container.innerHTML = html;
 }
 
@@ -233,13 +247,13 @@ async function loadSoumissions() {
   let html = `<div class="card"><h3>📸 Soumissions à valider</h3>`;
 
   subs.forEach(s => {
-    const badgeColor = s.status === 'pending' ? 'orange' : s.status === 'validated' ? 'green' : 'red';
+    const borderColor = s.status === 'pending' ? 'var(--orange)' : s.status === 'validated' ? 'var(--green)' : 'var(--red)';
     html += `
-      <div class="submission-card" style="border-left: 4px solid ${badgeColor}; padding:12px; margin-bottom:12px; background: var(--bg-secondary); border-radius:8px;">
+      <div style="border-left:4px solid ${borderColor}; padding:12px; margin-bottom:12px; background:var(--surface-2); border-radius:4px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
             <strong>${s.discord_id}</strong> — ${formatDate(s.submitted_at)}
-            <span class="badge badge-${badgeColor}">${s.status}</span>
+            <span style="margin-left:8px; font-size:11px; color:${borderColor};">[${s.status}]</span>
           </div>
           <div style="display:flex; gap:8px;">
             ${s.status === 'pending' ? `
@@ -248,13 +262,19 @@ async function loadSoumissions() {
             ` : ''}
           </div>
         </div>
-        <div style="margin-top:8px; display:flex; gap:16px;">
+        <div style="margin-top:8px; display:flex; gap:16px; font-size:13px;">
           <span>🎯 Kills: <strong>${s.kills ?? '—'}</strong></span>
           <span>💀 Deaths: <strong>${s.deaths ?? '—'}</strong></span>
           <span>📊 Score: <strong>${s.score ?? '—'}</strong></span>
           <span>📈 K/D: <strong>${s.kd ?? '—'}</strong></span>
         </div>
-        ${s.image_url ? `<div style="margin-top:8px;"><a href="${s.image_url}" target="_blank"><img src="${s.image_url}" style="max-height:120px; border-radius:4px; cursor:pointer;"></a></div>` : ''}
+        ${s.image_url ? `
+          <div style="margin-top:8px;">
+            <a href="${s.image_url}" target="_blank">
+              <img src="${s.image_url}" style="max-height:120px; border-radius:4px; cursor:pointer;">
+            </a>
+          </div>
+        ` : ''}
       </div>
     `;
   });
@@ -304,22 +324,21 @@ async function loadScoreboard() {
       <table class="data-table">
         <thead><tr><th>#</th><th>Joueur</th><th>Kills</th><th>Deaths</th><th>K/D</th><th>Score</th></tr></thead>
         <tbody>
+          ${scores.map((s, i) => `
+            <tr ${i < 3 ? 'style="font-weight:bold"' : ''}>
+              <td>${podium[i] || `#${i+1}`}</td>
+              <td>${s.username || s.discord_id}</td>
+              <td>${s.kills ?? '—'}</td>
+              <td>${s.deaths ?? '—'}</td>
+              <td>${s.kd ?? '—'}</td>
+              <td>${s.score ?? '—'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
   `;
 
-  scores.forEach((s, i) => {
-    html += `
-      <tr ${i < 3 ? 'style="font-weight:bold"' : ''}>
-        <td>${podium[i] || `#${i+1}`}</td>
-        <td>${s.username || s.discord_id}</td>
-        <td>${s.kills ?? '—'}</td>
-        <td>${s.deaths ?? '—'}</td>
-        <td>${s.kd ?? '—'}</td>
-        <td>${s.score ?? '—'}</td>
-      </tr>
-    `;
-  });
-
-  html += `</tbody></table></div>`;
   container.innerHTML = html;
 }
 
@@ -344,7 +363,6 @@ async function loadOutils() {
           <i class="fas fa-redo"></i> Reset classement
         </button>
       </div>
-      <div id="tournament-feedback" class="feedback" style="margin-top:12px;"></div>
     </div>
   `;
 
@@ -372,9 +390,19 @@ async function loadOutils() {
 }
 
 // ============================================
-// HELPER
+// HELPERS
 // ============================================
 async function getTournoiActif() {
   const tournois = await fetchSupabase('tournaments?status=eq.active&limit=1');
   return tournois?.[0] || null;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('fr-FR');
+}
+
+function setFeedback(msg) {
+  const el = document.getElementById('tournament-feedback');
+  if (el) el.textContent = msg;
 }
