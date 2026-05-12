@@ -49,6 +49,27 @@ export async function updateSupabase(endpoint, data) {
     return res.json();
 }
 
+export async function insertSupabase(endpoint, data) {
+
+    const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/${endpoint}`,
+        {
+            method: 'POST',
+
+            headers: {
+                apikey: SUPABASE_KEY,
+                Authorization: `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json',
+                Prefer: 'return=representation'
+            },
+
+            body: JSON.stringify(data)
+        }
+    );
+
+    return res.json();
+}
+
 export async function deleteSupabase(endpoint) {
 
     await fetch(
@@ -62,7 +83,6 @@ export async function deleteSupabase(endpoint) {
             }
         }
     );
-
 }
 
 // ============================================
