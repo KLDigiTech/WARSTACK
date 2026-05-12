@@ -115,4 +115,4 @@ async function updateLeaderboard(client) {
   }
 }
 
-module.exports = { updateLeaderboard };
+module.exports = { updateLeaderboard, calcScore, getDivision };
