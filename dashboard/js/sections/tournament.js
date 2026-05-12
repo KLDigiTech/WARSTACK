@@ -42,12 +42,12 @@ export async function initTournament() {
 }
 
 async function loadTab(tab) {
-  switch(tab) {
-    case 'tournoi':     return loadTournoi();
-    case 'inscrits':    return loadInscrits();
+  switch (tab) {
+    case 'tournoi': return loadTournoi();
+    case 'inscrits': return loadInscrits();
     case 'soumissions': return loadSoumissions();
-    case 'scoreboard':  return loadScoreboard();
-    case 'outils':      return loadOutils();
+    case 'scoreboard': return loadScoreboard();
+    case 'outils': return loadOutils();
   }
 }
 
@@ -65,45 +65,102 @@ async function loadTournoi() {
 
   if (actif) {
     html += `
-      <div class="card card-orange">
-        <h3>🟢 Tournoi en cours : ${actif.name}</h3>
-        <p>📅 Du <strong>${formatDate(actif.start_date)}</strong> au <strong>${formatDate(actif.end_date)}</strong></p>
-        ${actif.description ? `<p>📝 ${actif.description}</p>` : ''}
-        <p>👥 Max joueurs : <strong>${actif.max_players || '∞'}</strong></p>
-        <p>📊 Statut : <strong>${actif.status}</strong></p>
-        <div class="actions-grid" style="margin-top:12px">
-          <button class="btn btn-danger" id="btn-terminer">🏁 Terminer le tournoi</button>
-          <button class="btn btn-secondary" id="btn-annuler">❌ Annuler</button>
+      <div style="
+        background: linear-gradient(135deg, var(--surface-2), var(--surface-3));
+        border: 1px solid var(--orange);
+        border-left: 4px solid var(--orange);
+        box-shadow: 0 0 24px var(--orange-glow);
+        padding: 24px;
+        border-radius: var(--radius);
+        margin-bottom: 16px;
+      ">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div style="font-size:10px; letter-spacing:3px; color:var(--orange); font-weight:700; margin-bottom:6px;">🟢 TOURNOI ACTIF</div>
+            <h2 style="font-size:22px; color:var(--text); margin:0 0 16px 0; letter-spacing:2px;">${actif.name}</h2>
+            <div style="display:flex; gap:24px; flex-wrap:wrap;">
+              <div>
+                <div style="font-size:10px; letter-spacing:2px; color:var(--text-muted); margin-bottom:4px;">DÉBUT</div>
+                <div style="color:var(--green); font-weight:600;">${formatDate(actif.start_date)}</div>
+              </div>
+              <div>
+                <div style="font-size:10px; letter-spacing:2px; color:var(--text-muted); margin-bottom:4px;">FIN</div>
+                <div style="color:var(--green); font-weight:600;">${formatDate(actif.end_date)}</div>
+              </div>
+              <div>
+                <div style="font-size:10px; letter-spacing:2px; color:var(--text-muted); margin-bottom:4px;">MAX JOUEURS</div>
+                <div style="color:var(--text); font-weight:600;">${actif.max_players || '∞'}</div>
+              </div>
+            </div>
+            ${actif.description ? `<p style="margin:16px 0 0 0; color:var(--text-dim); font-size:13px;">${actif.description}</p>` : ''}
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px; min-width:140px;">
+            <button class="btn btn-danger" id="btn-terminer">🏁 Terminer</button>
+            <button class="btn btn-secondary" id="btn-annuler">❌ Annuler</button>
+          </div>
         </div>
       </div>
     `;
   } else {
     html += `
-      <div class="card">
-        <h3>➕ Créer un tournoi</h3>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:12px;">
-          <div class="form-group full">
+      <div style="
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--green);
+        padding: 28px;
+        border-radius: var(--radius);
+        box-shadow: 0 0 32px var(--green-glow);
+      ">
+        <div style="font-size:10px; letter-spacing:3px; color:var(--green-dim); font-weight:700; margin-bottom:20px;">➕ CRÉER UN TOURNOI</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+          <div class="form-group" style="grid-column: 1 / -1;">
             <label>Nom du tournoi</label>
-            <input type="text" id="t-nom" class="form-input" placeholder="ex: Tournoi PöF Saison 1">
+            <input type="text" id="t-nom" class="form-input" placeholder="ex: Tournoi PöF — Saison 1">
           </div>
+
           <div class="form-group">
             <label>Date de début</label>
             <input type="date" id="t-start" class="form-input">
           </div>
+
           <div class="form-group">
             <label>Date de fin</label>
             <input type="date" id="t-end" class="form-input">
           </div>
+
           <div class="form-group">
-            <label>Max joueurs (0 = illimité)</label>
+            <label>Max joueurs <span style="color:var(--text-muted)">(0 = illimité)</span></label>
             <input type="number" id="t-max" class="form-input" value="0" min="0">
           </div>
-          <div class="form-group full">
-            <label>Description (optionnel)</label>
-            <textarea id="t-desc" class="form-textarea" placeholder="Règles, infos..."></textarea>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Description <span style="color:var(--text-muted)">(optionnel)</span></label>
+            <textarea id="t-desc" class="form-textarea" placeholder="Règles, format, informations..."></textarea>
           </div>
+
         </div>
-        <button class="btn btn-primary" id="btn-create-tournoi" style="margin-top:16px;">🏆 Créer le tournoi</button>
+
+        <div style="margin-top:24px; display:flex; align-items:center; gap:16px;">
+          <button id="btn-create-tournoi" style="
+            background: linear-gradient(135deg, var(--green), var(--green-dim));
+            color: var(--bg);
+            border: none;
+            padding: 12px 28px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: var(--radius);
+            transition: opacity .2s;
+          " onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            🏆 Créer le tournoi
+          </button>
+          <span style="font-size:11px; color:var(--text-muted); letter-spacing:1px;">* Champs obligatoires : nom, dates</span>
+        </div>
       </div>
     `;
   }
@@ -111,17 +168,32 @@ async function loadTournoi() {
   const archives = tournois?.filter(t => t.status !== 'active') || [];
   if (archives.length) {
     html += `
-      <div class="card" style="margin-top:16px">
-        <h3>📁 Historique</h3>
+      <div style="
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        padding: 20px;
+        border-radius: var(--radius);
+        margin-top: 16px;
+      ">
+        <div style="font-size:10px; letter-spacing:3px; color:var(--text-muted); font-weight:700; margin-bottom:16px;">📁 HISTORIQUE</div>
         <table class="data-table">
-          <thead><tr><th>Nom</th><th>Début</th><th>Fin</th><th>Statut</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Début</th>
+              <th>Fin</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
           <tbody>
             ${archives.map(t => `
               <tr>
                 <td>${t.name}</td>
                 <td>${formatDate(t.start_date)}</td>
                 <td>${formatDate(t.end_date)}</td>
-                <td>${t.status}</td>
+                <td style="color:${t.status === 'termine' ? 'var(--green-dim)' : 'var(--red)'}">
+                  ${t.status}
+                </td>
               </tr>
             `).join('')}
           </tbody>
@@ -141,11 +213,11 @@ async function loadTournoi() {
 }
 
 async function creerTournoi() {
-  const nom   = document.getElementById('t-nom').value.trim();
+  const nom = document.getElementById('t-nom').value.trim();
   const start = document.getElementById('t-start').value;
-  const end   = document.getElementById('t-end').value;
-  const max   = parseInt(document.getElementById('t-max').value) || 0;
-  const desc  = document.getElementById('t-desc').value.trim();
+  const end = document.getElementById('t-end').value;
+  const max = parseInt(document.getElementById('t-max').value) || 0;
+  const desc = document.getElementById('t-desc').value.trim();
 
   if (!nom || !start || !end) {
     setFeedback('❌ Remplis tous les champs obligatoires.'); return;
@@ -154,13 +226,13 @@ async function creerTournoi() {
   setFeedback('Création en cours...');
 
   await insertSupabase('tournaments', {
-    name        : nom,
-    start_date  : start,
-    end_date    : end,
-    max_players : max || null,
-    description : desc || null,
-    status      : 'active',
-    created_at  : new Date().toISOString()
+    name: nom,
+    start_date: start,
+    end_date: end,
+    max_players: max || null,
+    description: desc || null,
+    status: 'active',
+    created_at: new Date().toISOString()
   });
 
   setFeedback('✅ Tournoi créé !');
@@ -219,7 +291,7 @@ async function loadInscrits() {
   container.innerHTML = html;
 }
 
-window.expulserJoueur = async function(id) {
+window.expulserJoueur = async function (id) {
   if (!confirm('Expulser ce joueur ?')) return;
   await updateSupabase(`tournament_entries?id=eq.${id}`, { status: 'expelled' });
   setFeedback('✅ Joueur expulsé.');
@@ -283,13 +355,13 @@ async function loadSoumissions() {
   container.innerHTML = html;
 }
 
-window.validerSub = async function(id) {
+window.validerSub = async function (id) {
   await updateSupabase(`tournament_submissions?id=eq.${id}`, { status: 'validated' });
   setFeedback('✅ Soumission validée.');
   loadSoumissions();
 };
 
-window.rejeterSub = async function(id) {
+window.rejeterSub = async function (id) {
   await updateSupabase(`tournament_submissions?id=eq.${id}`, { status: 'rejected' });
   setFeedback('❌ Soumission rejetée.');
   loadSoumissions();
@@ -326,7 +398,7 @@ async function loadScoreboard() {
         <tbody>
           ${scores.map((s, i) => `
             <tr ${i < 3 ? 'style="font-weight:bold"' : ''}>
-              <td>${podium[i] || `#${i+1}`}</td>
+              <td>${podium[i] || `#${i + 1}`}</td>
               <td>${s.username || s.discord_id}</td>
               <td>${s.kills ?? '—'}</td>
               <td>${s.deaths ?? '—'}</td>
@@ -342,7 +414,7 @@ async function loadScoreboard() {
   container.innerHTML = html;
 }
 
-window.refreshScoreboard = function() { loadScoreboard(); };
+window.refreshScoreboard = function () { loadScoreboard(); };
 
 // ============================================
 // ONGLET OUTILS
@@ -383,7 +455,7 @@ async function loadOutils() {
     setFeedback('Reset en cours...');
     const players = await fetchSupabase('players?select=discord_id');
     for (const p of players) {
-      await updateSupabase(`players?discord_id=eq.${p.discord_id}`, { kills:0, deaths:0, kd:0, wins:0 });
+      await updateSupabase(`players?discord_id=eq.${p.discord_id}`, { kills: 0, deaths: 0, kd: 0, wins: 0 });
     }
     setFeedback('✅ Classement reset');
   });
