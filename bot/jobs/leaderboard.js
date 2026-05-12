@@ -5,61 +5,104 @@
 const { EmbedBuilder } = require('discord.js');
 const supabase = require('../services/supabase');
 
+function calcScore(snapshot) {
+  const kd      = parseFloat(snapshot.kd)      || 0;
+  const winrate = parseFloat(snapshot.winrate) || 0;
+  const kills   = parseInt(snapshot.kills)     || 0;
+  const games   = parseInt(snapshot.games)     || 1;
+  const kpm     = kills / games;
+
+  const kd_score      = Math.min(kd / 5, 1) * 100;
+  const winrate_score = Math.min(winrate / 60, 1) * 100;
+  const kpm_score     = Math.min(kpm / 20, 1) * 100;
+
+  return ((kd_score * 0.30) + (winrate_score * 0.35) + (kpm_score * 0.25));
+}
+
+function getDivision(score) {
+  if (score >= 65) return { name: 'WARSTACK', emoji: '🔱' };
+  if (score >= 55) return { name: 'Phantom',  emoji: '👻' };
+  if (score >= 45) return { name: 'Elite',    emoji: '💎' };
+  if (score >= 35) return { name: 'Veteran',  emoji: '🎖️' };
+  if (score >= 25) return { name: 'Grunt',    emoji: '⚔️' };
+  return             { name: 'Recruit',       emoji: '🪖' };
+}
+
 async function updateLeaderboard(client) {
   try {
     const channel = client.channels.cache.find(c => c.name === 'classement');
     if (!channel) return console.log('❌ Salon #classement introuvable');
 
+    // Récupère tous les joueurs avec tracker_id
     const { data: players, error } = await supabase
       .from('players')
-      .select('*')
-      .order('kd', { ascending: false })
-      .limit(10);
+      .select('discord_id, username, tracker_id')
+      .not('tracker_id', 'is', null);
 
-    if (error || !players || players.length === 0) return;
+    if (error || !players?.length) return;
 
-    // Podium
+    // Pour chaque joueur, récupère le dernier snapshot
+    const playerStats = [];
+    for (const player of players) {
+      const { data: snapshot } = await supabase
+        .from('player_snapshots')
+        .select('*')
+        .eq('tracker_id', player.tracker_id)
+        .order('snapshot_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!snapshot) continue;
+
+      const score = calcScore(snapshot);
+      const division = getDivision(score);
+
+      playerStats.push({
+        username : player.username || 'Inconnu',
+        score    : score.toFixed(2),
+        division,
+        kd       : snapshot.kd,
+        kills    : snapshot.kills,
+        wins     : snapshot.wins,
+        winrate  : snapshot.winrate,
+      });
+    }
+
+    // Trie par score décroissant
+    playerStats.sort((a, b) => parseFloat(b.score) - parseFloat(a.score));
+
+    const top10 = playerStats.slice(0, 10);
     const podium = ['🥇', '🥈', '🥉'];
     const separator = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
 
-    // Rows du classement
-    const rows = players.map((p, i) => {
+    const rows = top10.map((p, i) => {
       const rank = podium[i] || `\`#${i + 1}\``;
-      const kd = (p.kd || 0).toFixed(2);
-      const kills = (p.kills || 0).toString().padStart(4, ' ');
-      const platform = p.platform?.toUpperCase() || '???';
-      return `${rank} **${p.pseudo_bf6}** \`[${platform}]\`\n┗ ⚡ K/D: \`${kd}\` • 🎯 Kills: \`${kills}\` • 🏅 Wins: \`${p.wins || 0}\``;
+      return `${rank} **${p.username}** ${p.division.emoji} \`${p.division.name}\`\n┗ 📊 Score: \`${p.score}\` • 📈 K/D: \`${p.kd}\` • 🏆 Wins: \`${p.wins}\``;
     });
 
-    // Stats globales
-    const totalKills = players.reduce((s, p) => s + (p.kills || 0), 0);
-    const bestKD = (players[0].kd || 0).toFixed(2);
-    const mvp = players[0].pseudo_bf6;
+    const totalKills = playerStats.reduce((s, p) => s + (parseInt(p.kills) || 0), 0);
+    const mvp = top10[0]?.username || '—';
+    const bestScore = top10[0]?.score || '0';
 
     const embed = new EmbedBuilder()
-      .setTitle('🏆  C L A S S E M E N T  —  P ö F  B F 6')
-      .setColor(0x00ff41)
+      .setTitle('🏆  C L A S S E M E N T  —  W A R S T A C K')
+      .setColor(0xFF6600)
       .setDescription(
         `${separator}\n` +
         rows.join(`\n${separator}\n`) +
         `\n${separator}`
       )
-      .addFields(
-        {
-          name: '📊 STATISTIQUES SAISON',
-          value:
-            `> 👥 **Joueurs inscrits** : \`${players.length}\`\n` +
-            `> 🎯 **Kills totaux** : \`${totalKills.toLocaleString()}\`\n` +
-            `> 📈 **Meilleur K/D** : \`${bestKD}\`\n` +
-            `> ⭐ **MVP actuel** : **${mvp}**`,
-        }
-      )
-      .setFooter({
-        text: '⚔️ WARSTACK • PöF BF6 Tournament • Mis à jour toutes les heures'
+      .addFields({
+        name: '📊 STATISTIQUES',
+        value:
+          `> 👥 **Joueurs classés** : \`${playerStats.length}\`\n` +
+          `> 🎯 **Kills totaux** : \`${totalKills.toLocaleString('fr-FR')}\`\n` +
+          `> 📊 **Meilleur score** : \`${bestScore}\`\n` +
+          `> ⭐ **MVP actuel** : **${mvp}**`,
       })
+      .setFooter({ text: '⚔️ WARSTACK • Mis à jour toutes les heures' })
       .setTimestamp();
 
-    // Supprime anciens messages bot
     const messages = await channel.messages.fetch({ limit: 10 });
     const botMessages = messages.filter(m => m.author.bot);
     await Promise.all(botMessages.map(m => m.delete()));
