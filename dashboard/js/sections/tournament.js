@@ -2,7 +2,7 @@
 // SECTION — tournament.js
 // ============================================
 
-import { fetchSupabase, updateSupabase, insertSupabase, callBotAPI } from '../api.js';
+import { fetchSupabase, updateSupabase, insertSupabase, deleteSupabase, callBotAPI } from '../api.js';
 import { showConfirm } from '../ui/confirm.js';
 
 export async function initTournament() {
@@ -59,7 +59,7 @@ async function loadTournoi() {
   const container = document.getElementById('tab-tournoi');
   container.innerHTML = '<p>Chargement...</p>';
 
-  const tournois = await fetchSupabase('tournaments?order=created_at.desc&limit=5');
+  const tournois = await fetchSupabase('tournaments?order=created_at.desc&limit=20');
   const actif = tournois?.find(t => t.status === 'active');
 
   let html = '';
@@ -173,7 +173,7 @@ async function loadTournoi() {
         <div style="font-size:10px; letter-spacing:3px; color:var(--text-muted); font-weight:700; margin-bottom:16px;">📁 HISTORIQUE</div>
         <table class="data-table">
           <thead>
-            <tr><th>Nom</th><th>Début</th><th>Fin</th><th>Statut</th></tr>
+            <tr><th>Nom</th><th>Début</th><th>Fin</th><th>Statut</th><th>Action</th></tr>
           </thead>
           <tbody>
             ${archives.map(t => `
@@ -183,6 +183,11 @@ async function loadTournoi() {
                 <td>${formatDate(t.end_date)}</td>
                 <td style="color:${t.status === 'termine' ? 'var(--green-dim)' : 'var(--red)'}">
                   ${t.status}
+                </td>
+                <td>
+                  <button class="btn btn-danger btn-sm" onclick="supprimerTournoi('${t.id}', '${t.name}')">
+                    🗑️ Supprimer
+                  </button>
                 </td>
               </tr>
             `).join('')}
@@ -481,6 +486,23 @@ async function loadOutils() {
     });
   });
 }
+
+// ============================================
+// WINDOW FUNCTIONS
+// ============================================
+window.supprimerTournoi = function(id, nom) {
+  showConfirm({
+    title       : '🗑️ Supprimer le tournoi',
+    message     : `Supprimer définitivement "${nom}" de l'historique ? Cette action est irréversible.`,
+    confirmText : 'Supprimer',
+    cancelText  : 'Annuler',
+    onConfirm   : async () => {
+      await deleteSupabase(`tournaments?id=eq.${id}`);
+      setFeedback('✅ Tournoi supprimé.');
+      loadTournoi();
+    }
+  });
+};
 
 // ============================================
 // HELPERS
