@@ -1,6 +1,5 @@
 // ============================================
 // COMMANDE — classement.js
-// Affiche le classement WARSTACK
 // ============================================
 
 const { SlashCommandBuilder } = require('discord.js');
@@ -12,8 +11,13 @@ module.exports = {
     .setDescription('🏆 Affiche le classement WARSTACK'),
 
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
-    await updateLeaderboard(interaction.client);
-    await interaction.editReply({ content: '✅ Classement mis à jour dans #classement !' });
+    // Répond immédiatement pour éviter le timeout Discord
+    await interaction.reply({ 
+      content: '⏳ Mise à jour du classement en cours...', 
+      ephemeral: true 
+    });
+    
+    // Lance le leaderboard en arrière-plan
+    updateLeaderboard(interaction.client).catch(console.error);
   }
 };
