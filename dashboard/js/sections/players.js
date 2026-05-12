@@ -1,352 +1,113 @@
-import {
-  fetchSupabase,
-  updateSupabase,
-  deleteSupabase
-} from '../api.js';
-
-import {
-  createPanel
-} from '../components/panel.js';
-
-import {
-  createTable
-} from '../components/table.js';
-
-import {
-  createActionButtons
-} from '../components/actionButtons.js';
-
-import {
-  openModal,
-  closeModal
-} from '../ui/modal.js';
-
-import {
-  showToast
-} from '../ui/toast.js';
+import { fetchSupabase, deleteSupabase } from '../api.js';
+import { createPanel } from '../components/panel.js';
+import { createTable } from '../components/table.js';
+import { createActionButtons } from '../components/actionButtons.js';
+import { showToast } from '../ui/toast.js';
 
 let allPlayers = [];
 
-// ============================================
-// INIT
-// ============================================
-
 export async function initPlayers() {
+  const content = document.getElementById('section-content');
 
-  const content =
-    document.getElementById(
-      'section-content'
-    );
+  content.innerHTML = createPanel({
+    title: '👥 Joueurs inscrits',
+    body: `
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="search-player" class="search-input" placeholder="Rechercher...">
+      </div>
+      <div id="players-table-wrapper">
+        <div class="loading-state">Chargement...</div>
+      </div>
+    `
+  });
 
-  content.innerHTML = `
-
-    ${createPanel({
-
-      title: '👥 Joueurs inscrits',
-
-      body: `
-
-        <div class="search-box">
-
-          <i class="fas fa-search"></i>
-
-          <input
-            type="text"
-            id="search-player"
-            class="search-input"
-            placeholder="Rechercher..."
-          >
-
-        </div>
-
-        <div id="players-table-wrapper">
-
-          <div class="loading-state">
-            Chargement...
-          </div>
-
-        </div>
-
-      `
-    })}
-
-  `;
-
-  const players =
-    await fetchSupabase(
-      'players?select=*&order=kd.desc'
-    );
-
+  // Récupère joueurs + dernier snapshot
+  const players = await fetchSupabase('players?select=*&order=created_at.desc');
   allPlayers = players || [];
+
+  // Pour chaque joueur, récupère le dernier snapshot
+  for (const player of allPlayers) {
+    if (player.tracker_id) {
+      const snapshots = await fetchSupabase(
+        `player_snapshots?tracker_id=eq.${player.tracker_id}&order=snapshot_at.desc&limit=1`
+      );
+      player.snapshot = snapshots?.[0] || null;
+    }
+  }
 
   renderPlayersTable(allPlayers);
 
-  document
-    .getElementById('search-player')
-    .addEventListener('input', (e) => {
-
-      const q =
-        e.target.value.toLowerCase();
-
-      const filtered =
-        allPlayers.filter(p =>
-
-          p.pseudo_bf6
-            ?.toLowerCase()
-            .includes(q)
-
-        );
-
-      renderPlayersTable(filtered);
-    });
+  document.getElementById('search-player').addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    const filtered = allPlayers.filter(p =>
+      p.username?.toLowerCase().includes(q) ||
+      p.tracker_id?.includes(q)
+    );
+    renderPlayersTable(filtered);
+  });
 }
 
-// ============================================
-// TABLE
-// ============================================
+function calcScore(snapshot) {
+  if (!snapshot) return 0;
+  const kd      = parseFloat(snapshot.kd)      || 0;
+  const winrate = parseFloat(snapshot.winrate) || 0;
+  const kills   = parseInt(snapshot.kills)     || 0;
+  const games   = parseInt(snapshot.games)     || 1;
+  const kpm     = kills / games;
+  const kd_score      = Math.min(kd / 5, 1) * 100;
+  const winrate_score = Math.min(winrate / 60, 1) * 100;
+  const kpm_score     = Math.min(kpm / 20, 1) * 100;
+  return ((kd_score * 0.30) + (winrate_score * 0.35) + (kpm_score * 0.25)).toFixed(2);
+}
+
+function getDivision(score) {
+  const s = parseFloat(score);
+  if (s >= 65) return 'WARSTACK 🔱';
+  if (s >= 55) return 'Phantom 👻';
+  if (s >= 45) return 'Elite 💎';
+  if (s >= 35) return 'Veteran 🎖️';
+  if (s >= 25) return 'Grunt ⚔️';
+  return 'Recruit 🪖';
+}
 
 function renderPlayersTable(players) {
-
-  const wrapper =
-    document.getElementById(
-      'players-table-wrapper'
-    );
+  const wrapper = document.getElementById('players-table-wrapper');
 
   if (!players || players.length === 0) {
-
-    wrapper.innerHTML = `
-
-      <div class="empty-state">
-        Aucun joueur trouvé
-      </div>
-
-    `;
-
+    wrapper.innerHTML = '<div class="empty-state">Aucun joueur trouvé</div>';
     return;
   }
 
   wrapper.innerHTML = createTable({
-
-    headers: [
-      'Pseudo',
-      'Plateforme',
-      'K/D',
-      'Kills',
-      'Deaths',
-      'Wins',
-      'Actions'
-    ],
-
-    rows: players.map(p => `
-
-      <tr>
-
-        <td>
-
-          <strong>
-            ${p.pseudo_bf6}
-          </strong>
-
-        </td>
-
-        <td>
-          ${p.platform?.toUpperCase()}
-        </td>
-
-        <td>
-          ${(p.kd || 0).toFixed(2)}
-        </td>
-
-        <td>
-          ${p.kills || 0}
-        </td>
-
-        <td>
-          ${p.deaths || 0}
-        </td>
-
-        <td>
-          ${p.wins || 0}
-        </td>
-
-        <td>
-
-          ${createActionButtons({
-
-            edit: `
-              window.editPlayer(
-                '${p.discord_id}'
-              )
-            `,
-
-            remove: `
-              window.deletePlayer(
-                '${p.discord_id}',
-                '${p.pseudo_bf6}'
-              )
-            `
-          })}
-
-        </td>
-
-      </tr>
-
-    `).join('')
-
+    headers: ['Pseudo', 'Tracker ID', 'Division', 'Score', 'K/D', 'Kills', 'Wins', 'Actions'],
+    rows: players.map(p => {
+      const s = p.snapshot;
+      const score = calcScore(s);
+      const division = getDivision(score);
+      return `
+        <tr>
+          <td><strong>${p.username || '—'}</strong></td>
+          <td><code>${p.tracker_id || '—'}</code></td>
+          <td>${division}</td>
+          <td>${score}</td>
+          <td>${s?.kd ?? '—'}</td>
+          <td>${s?.kills ?? '—'}</td>
+          <td>${s?.wins ?? '—'}</td>
+          <td>
+            ${createActionButtons({
+              remove: `window.deletePlayer('${p.discord_id}', '${p.username}')`
+            })}
+          </td>
+        </tr>
+      `;
+    }).join('')
   });
 }
 
-// ============================================
-// EDIT PLAYER
-// ============================================
-
-window.editPlayer = function(discordId) {
-
-  const player =
-    allPlayers.find(
-
-      p =>
-        p.discord_id === discordId
-
-    );
-
-  if (!player) {
-    return;
-  }
-
-  openModal(
-
-    'Modifier joueur',
-
-    `
-
-      <div class="form-group">
-
-        <label>
-          Pseudo BF6
-        </label>
-
-        <input
-          type="text"
-          id="edit-player-pseudo"
-          class="form-input"
-          value="${player.pseudo_bf6}"
-        >
-
-      </div>
-
-      <div
-        style="
-          margin-top:20px;
-          display:flex;
-          justify-content:flex-end;
-          gap:10px;
-        "
-      >
-
-        <button
-          class="btn btn-secondary"
-          id="cancel-edit-player"
-        >
-          Annuler
-        </button>
-
-        <button
-          class="btn btn-primary"
-          id="save-edit-player"
-        >
-          Sauvegarder
-        </button>
-
-      </div>
-
-    `
-  );
-
-  document
-    .getElementById(
-      'cancel-edit-player'
-    )
-    .addEventListener(
-      'click',
-      closeModal
-    );
-
-  document
-    .getElementById(
-      'save-edit-player'
-    )
-    .addEventListener(
-      'click',
-      async () => {
-
-        const pseudo =
-          document.getElementById(
-            'edit-player-pseudo'
-          ).value;
-
-        await updatePlayer(
-          discordId,
-          pseudo
-        );
-
-        closeModal();
-      }
-    );
-};
-
-// ============================================
-// UPDATE PLAYER
-// ============================================
-
-async function updatePlayer(
-  discordId,
-  pseudo
-) {
-
-  await updateSupabase(
-
-    `players?discord_id=eq.${discordId}`,
-
-    {
-      pseudo_bf6: pseudo
-    }
-  );
-
-  showToast(
-    '✅ Joueur mis à jour'
-  );
-
-  initPlayers();
-}
-
-// ============================================
-// DELETE PLAYER
-// ============================================
-
-window.deletePlayer = async function(
-  discordId,
-  pseudo
-) {
-
-  const confirmDelete =
-    confirm(
-
-      `Supprimer ${pseudo} ?`
-
-    );
-
-  if (!confirmDelete) {
-    return;
-  }
-
-  await deleteSupabase(
-    `players?discord_id=eq.${discordId}`
-  );
-
-  showToast(
-    '✅ Joueur supprimé'
-  );
-
+window.deletePlayer = async function(discordId, username) {
+  if (!confirm(`Supprimer ${username} ?`)) return;
+  await deleteSupabase(`players?discord_id=eq.${discordId}`);
+  showToast('✅ Joueur supprimé');
   initPlayers();
 };
