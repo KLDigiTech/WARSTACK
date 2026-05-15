@@ -497,6 +497,11 @@ window.supprimerTournoi = function(id, nom) {
     confirmText : 'Supprimer',
     cancelText  : 'Annuler',
     onConfirm   : async () => {
+      // Supprime d'abord les enfants
+      await deleteSupabase(`tournament_submissions?tournament_id=eq.${id}`);
+      await deleteSupabase(`tournament_entries?tournament_id=eq.${id}`);
+      await deleteSupabase(`tournament_scores?tournament_id=eq.${id}`);
+      // Puis le tournoi
       await deleteSupabase(`tournaments?id=eq.${id}`);
       setFeedback('✅ Tournoi supprimé.');
       loadTournoi();
