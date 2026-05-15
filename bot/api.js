@@ -93,7 +93,7 @@ router.get('/guild', async (req, res) => {
   res.json({
     name: guild.name,
     icon: guild.iconURL({
-      extension: 'png',
+      dynamic: true,
       size: 256
     })
   });
