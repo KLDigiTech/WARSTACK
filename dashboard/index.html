@@ -20,26 +20,81 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
 
+    <!-- HEADER -->
     <div class="sidebar-logo">
-      <img id="server-logo" class="server-logo" src="" alt="server">
+
+      <img id="server-logo" class="server-logo" src="./assets/warstack-logo.png" alt="server">
+
       <div class="sidebar-meta">
-        <div id="server-title">Chargement...</div>
-        <div class="connected-user">
-          <img id="user-avatar" class="user-avatar" src="" alt="user">
-          <span id="user-name">Chargement...</span>
+
+        <div id="server-title">
+          Chargement...
         </div>
+
+        <!-- USER -->
+        <div class="connected-user" id="user-menu">
+
+          <img id="user-avatar" class="user-avatar" src="" alt="user">
+
+          <span id="user-name">
+            Chargement...
+          </span>
+
+          <i class="fas fa-chevron-down user-chevron"></i>
+
+          <!-- DROPDOWN -->
+          <div class="user-dropdown" id="user-dropdown">
+
+            <div class="dropdown-user-card">
+
+              <img id="dropdown-avatar" class="dropdown-avatar" src="" alt="avatar">
+
+              <div class="dropdown-user-info">
+                <span id="dropdown-name">Utilisateur</span>
+                <span class="dropdown-role">CONNECTED</span>
+              </div>
+
+            </div>
+
+            <div class="dropdown-separator"></div>
+
+            <button>
+              <i class="fas fa-user"></i>
+              Mon profil
+            </button>
+
+            <button>
+              <i class="fas fa-cog"></i>
+              Paramètres
+            </button>
+
+            <button id="logout-btn" class="logout-btn">
+              <i class="fas fa-sign-out-alt"></i>
+              Déconnexion
+            </button>
+
+          </div>
+
+        </div>
+
       </div>
+
     </div>
 
+    <!-- SERVER -->
     <div class="sidebar-server">
       <i class="fas fa-server"></i>
       <span id="server-name">WARSTACK</span>
     </div>
 
+    <!-- NAV -->
     <nav class="sidebar-nav">
 
       <div class="nav-group">
-        <div class="nav-group-title">GÉNÉRAL</div>
+
+        <div class="nav-group-title">
+          GÉNÉRAL
+        </div>
 
         <a href="#" class="nav-item active" data-section="overview">
           <i class="fas fa-chart-line"></i>
@@ -55,10 +110,14 @@
           <i class="fas fa-trophy"></i>
           <span>Tournoi</span>
         </a>
+
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">COMMUNAUTÉ</div>
+
+        <div class="nav-group-title">
+          COMMUNAUTÉ
+        </div>
 
         <a href="#" class="nav-item" data-section="welcome">
           <i class="fas fa-door-open"></i>
@@ -79,10 +138,14 @@
           <i class="fas fa-lightbulb"></i>
           <span>Suggestions</span>
         </a>
+
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">MODÉRATION</div>
+
+        <div class="nav-group-title">
+          MODÉRATION
+        </div>
 
         <a href="#" class="nav-item" data-section="moderation">
           <i class="fas fa-shield-alt"></i>
@@ -103,10 +166,14 @@
           <i class="fas fa-list-alt"></i>
           <span>Logs</span>
         </a>
+
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">AUTOMATISATION</div>
+
+        <div class="nav-group-title">
+          AUTOMATISATION
+        </div>
 
         <a href="#" class="nav-item" data-section="messages">
           <i class="fas fa-clock"></i>
@@ -122,10 +189,14 @@
           <i class="fas fa-hashtag"></i>
           <span>Salons</span>
         </a>
+
       </div>
 
       <div class="nav-group">
-        <div class="nav-group-title">SYSTÈME</div>
+
+        <div class="nav-group-title">
+          SYSTÈME
+        </div>
 
         <a href="#" class="nav-item" data-section="access">
           <i class="fas fa-user-shield"></i>
@@ -136,10 +207,12 @@
           <i class="fas fa-cog"></i>
           <span>Paramètres</span>
         </a>
+
       </div>
 
     </nav>
 
+    <!-- STATUS -->
     <div class="sidebar-status">
       <div class="status-dot" id="status-dot"></div>
       <span id="status-label">BOT OFFLINE</span>
@@ -151,11 +224,15 @@
   <main class="main-content">
 
     <header class="dash-header">
-      <h1 class="dash-title" id="section-title">Vue d'ensemble</h1>
+
+      <h1 class="dash-title" id="section-title">
+        Vue d'ensemble
+      </h1>
 
       <div class="dash-info">
         <span id="current-time"></span>
       </div>
+
     </header>
 
     <div id="section-content"></div>
@@ -183,34 +260,106 @@
   <!-- TOAST -->
   <div id="toast" class="toast"></div>
 
-  <!-- AUTH TEST -->
+  <!-- AUTH -->
   <script type="module">
+
     import { supabase } from './js/supabaseClient.js'
 
-    const { data: { session } } = await supabase.auth.getSession()
+    // SESSION
+    const { data: { session } } =
+      await supabase.auth.getSession()
 
     if (!session) {
-      window.location.href = '/dashboard/login.html'
+
+      window.location.href =
+        '/dashboard/login.html'
     }
 
-    const user = session.user
+    // USER
+    const user =
+      session.user
 
     document.getElementById('user-name').textContent =
-      user.user_metadata.full_name
+      user.user_metadata.full_name ||
+      user.user_metadata.name ||
+      'Utilisateur'
 
     document.getElementById('user-avatar').src =
-      user.user_metadata.avatar_url
+      user.user_metadata.avatar_url ||
+      user.user_metadata.picture ||
+      './assets/default-avatar.png'
+    document.getElementById('dropdown-avatar').src =
+      document.getElementById('user-avatar').src
 
-    const guildResponse = await fetch('http://localhost:3001/api/guild')
+    document.getElementById('dropdown-name').textContent =
+      document.getElementById('user-name').textContent
+      
+    // GUILD
+    try {
 
-    const guild = await guildResponse.json()
+      const guildResponse = await fetch('https://warstack-bot.onrender.com/api/guild')
 
-    document.getElementById('server-title').textContent =
-      guild.name
+      const guild = await guildResponse.json()
 
-    document.getElementById('server-logo').src =
-      guild.icon
+      document.getElementById('server-title').textContent =
+        guild.name || 'WARSTACK'
+
+      document.getElementById('server-name').textContent =
+        guild.name || 'WARSTACK'
+
+      document.getElementById('server-logo').src =
+        guild.icon || './assets/warstack-logo.png'
+
+    } catch (err) {
+
+      console.error(err)
+    }
+
+    // DROPDOWN
+    const userMenu =
+      document.getElementById('user-menu')
+
+    const userDropdown =
+      document.getElementById('user-dropdown')
+
+    const chevron =
+      document.querySelector('.user-chevron')
+
+    chevron.addEventListener('click', (e) => {
+
+      e.stopPropagation()
+
+      userDropdown.classList.toggle('open')
+      userMenu.classList.toggle('user-menu-open')
+
+    })
+
+    document.addEventListener('click', () => {
+
+      userDropdown.classList.remove('open')
+      userMenu.classList.remove('user-menu-open')
+
+    })
+
+    userDropdown.addEventListener('click', (e) => {
+
+      e.stopPropagation()
+
+    })
+
+    // LOGOUT
+    document.getElementById('logout-btn').addEventListener('click', async (e) => {
+
+      e.stopPropagation()
+
+      await supabase.auth.signOut()
+
+      window.location.href = '/dashboard/login.html'
+
+    })
+
   </script>
+
 </body>
 
 </html>

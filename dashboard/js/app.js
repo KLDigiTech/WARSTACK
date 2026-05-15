@@ -345,5 +345,30 @@ async function initDashboard() {
     initialSection
   );
 }
+const userMenu =
+  document.getElementById('user-menu');
 
+const userDropdown =
+  document.getElementById('user-dropdown');
+
+if (
+  userMenu &&
+  userDropdown
+){
+
+  userMenu.addEventListener(
+    'click',
+    () => {
+
+      userDropdown.classList.toggle(
+        'open'
+      );
+
+      userMenu.classList.toggle(
+        'user-menu-open'
+      );
+    }
+  );
+}
 initDashboard();
+

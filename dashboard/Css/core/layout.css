@@ -2,11 +2,24 @@
 
 .main-content{
   margin-left:var(--sidebar-width);
-  flex:1;
-  padding:28px;
-  min-height:100vh;
-}
 
+  min-height:100vh;
+
+  padding:34px;
+
+  display:flex;
+  flex-direction:column;
+
+  background:
+    radial-gradient(circle at top, rgba(0,255,120,.03), transparent 35%),
+    #050805;
+}
+.dashboard-container{
+  width:100%;
+  max-width:1600px;
+
+  margin:0 auto;
+}
 .cards-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);

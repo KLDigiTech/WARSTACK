@@ -3,23 +3,75 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>WARSTACK Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>WARSTACK — Connexion</title>
+
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/pages/login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
-<body>
+<body class="login-body">
 
-    <button id="discord-login">
-        Connexion Discord
-    </button>
+    <div class="login-background"></div>
+
+    <main class="login-page">
+
+        <div class="login-card">
+
+            <div class="login-logo">
+                <img id="login-server-logo" src="" alt="WARSTACK">
+            </div>
+
+            <h1>WARSTACK</h1>
+
+            <p>
+                Dashboard Discord Battlefield Competitive
+            </p>
+
+            <button id="discord-login-btn" class="discord-login-btn">
+
+                <i class="fab fa-discord"></i>
+
+                <span>Connexion Discord</span>
+
+            </button>
+
+        </div>
+
+    </main>
 
     <script type="module">
+
         import { supabase } from './js/supabaseClient.js'
+        const guildResponse =
+            await fetch('https://warstack-bot.onrender.com/api/guild')
 
-        const { data: { session } } = await supabase.auth.getSession()
+        const guild =
+            await guildResponse.json()
 
-        if (!session) {
-            window.location.href = '/dashboard/login.html'
-        }
+        document.getElementById('login-server-logo').src =
+            guild.icon || 'https://placehold.co/128x128'
+        const btn =
+            document.getElementById('discord-login-btn')
+
+        btn.addEventListener('click', async () => {
+
+            await supabase.auth.signInWithOAuth({
+
+                provider: 'discord',
+
+                options: {
+                    redirectTo: 'http://127.0.0.1:3000/dashboard/index.html'
+                }
+            })
+        })
+
     </script>
 
 </body>
