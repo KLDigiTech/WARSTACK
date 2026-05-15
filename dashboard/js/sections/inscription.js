@@ -3,7 +3,7 @@
 // Logique — page inscription tournoi publique
 // ============================================
 
-import { SUPABASE_URL, SUPABASE_KEY, BOT_URL } from './config.js';
+import { SUPABASE_URL, SUPABASE_KEY, BOT_URL } from '../config.js';
 
 // ============================================
 // STATE

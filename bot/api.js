@@ -79,5 +79,25 @@ router.get('/tracker/:pseudo', async (req, res) => {
     res.json({ found: false });
   }
 });
+// Infos serveur Discord
+router.get('/guild', async (req, res) => {
+
+  const guild = global.botClient.guilds.cache.first();
+
+  if (!guild) {
+    return res.status(404).json({
+      error: 'Serveur introuvable'
+    });
+  }
+
+  res.json({
+    name: guild.name,
+    icon: guild.iconURL({
+      extension: 'png',
+      size: 256
+    })
+  });
+
+});
 
 module.exports = router;

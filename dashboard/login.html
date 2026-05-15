@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WARSTACK Login</title>
+</head>
+
+<body>
+
+    <button id="discord-login">
+        Connexion Discord
+    </button>
+
+    <script type="module">
+        import { supabase } from './js/supabaseClient.js'
+
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (!session) {
+            window.location.href = '/dashboard/login.html'
+        }
+    </script>
+
+</body>
+
+</html>
