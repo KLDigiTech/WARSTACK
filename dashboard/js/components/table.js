@@ -7,27 +7,31 @@ export function createTable({
 
   return `
 
-    <table class="data-table">
+    <div class="table-wrapper">
 
-      <thead>
+      <table class="data-table">
 
-        <tr>
+        <thead>
 
-          ${headers.map(h => `
-            <th>${h}</th>
-          `).join('')}
+          <tr>
 
-        </tr>
+            ${headers.map(h => `
+              <th>${h}</th>
+            `).join('')}
 
-      </thead>
+          </tr>
 
-      <tbody>
+        </thead>
 
-        ${rows}
+        <tbody>
 
-      </tbody>
+          ${rows}
 
-    </table>
+        </tbody>
+
+      </table>
+
+    </div>
 
   `;
 }

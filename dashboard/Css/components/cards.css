@@ -1,159 +1,118 @@
-/* components/cards.css */
+/* dashboard/Css/components/cards.css */
 
 .card {
   position: relative;
   overflow: hidden;
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(12,18,15,.92),
-      rgba(7,11,9,.96)
-    );
-
-  border: 1px solid rgba(0,255,120,.08);
-  border-radius: 22px;
-
-  padding: 18px;
-
   display: flex;
   align-items: center;
   gap: 14px;
 
-  min-width: 0;
+  min-height: 92px;
 
-  backdrop-filter: blur(12px);
+  padding: 18px 20px;
+
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10,16,13,.94),
+      rgba(7,10,9,.98)
+    );
+
+  border: 1px solid rgba(0,255,120,.07);
 
   box-shadow:
-    0 10px 30px rgba(0,0,0,.35),
-    0 0 25px rgba(0,255,120,.04);
+    0 8px 25px rgba(0,0,0,.30),
+    0 0 18px rgba(0,255,120,.03);
 
   transition:
-    transform .22s ease,
-    border-color .22s ease,
-    box-shadow .22s ease,
-    background .22s ease;
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255,255,255,.035),
-      transparent 28%
-    );
-
-  pointer-events: none;
-}
-
-.card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-
-  background:
-    linear-gradient(
-      to right,
-      transparent,
-      rgba(0,255,120,.45),
-      transparent
-    );
-
-  opacity: 0;
-
-  transition: opacity .22s ease;
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease;
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
 
-  border-color: rgba(0,255,120,.18);
+  border-color: rgba(0,255,120,.14);
 
   box-shadow:
-    0 20px 45px rgba(0,0,0,.45),
-    0 0 35px rgba(0,255,120,.08);
-}
-
-.card:hover::after {
-  opacity: 1;
+    0 12px 30px rgba(0,0,0,.36),
+    0 0 20px rgba(0,255,120,.05);
 }
 
 .card-icon {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
+
+  flex-shrink: 0;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  flex-shrink: 0;
+  border-radius: 16px;
 
-  border-radius: 18px;
+  font-size: 16px;
 
-  position: relative;
-  overflow: hidden;
+  color: #ffffff;
 
   background:
     linear-gradient(
       145deg,
-      rgba(0,255,140,.22),
-      rgba(0,180,255,.12)
+      rgba(0,255,140,.18),
+      rgba(0,180,255,.08)
     );
 
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.05);
+}
 
-  color: #ffffff;
+.card-content {
+  flex: 1;
 
-  font-size: 18px;
-
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.08),
-    inset 0 -8px 18px rgba(0,0,0,.25),
-    0 8px 20px rgba(0,255,140,.12),
-    0 0 20px rgba(0,180,255,.08);
-
-  backdrop-filter: blur(10px);
-
-  transition:
-    transform .22s ease,
-    box-shadow .22s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .card-value {
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: 2px;
+
   line-height: 1;
 
   color: #00ff88;
 
   text-shadow:
-    0 0 12px rgba(0,255,120,.35),
-    0 0 25px rgba(0,255,120,.12);
+    0 0 12px rgba(0,255,120,.20);
 }
 
 .card-label {
   margin-top: 6px;
 
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
+
   letter-spacing: 2px;
-
-  color: #d8ffe2;
-
   text-transform: uppercase;
 
-  opacity: .82;
+  color: #caffdb;
+
+  opacity: .72;
 }
 
-.card-content {
-  flex: 1;
-  min-width: 0;
+.cards-grid {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(240px, 1fr));
+
+  gap: 18px;
+
+  margin-top: 18px;
+  margin-bottom: 24px;
 }

@@ -1,77 +1,85 @@
-import { fetchSupabase } from '../api.js';
-import { createStatCard } from '../components/card.js';
-import { createPanel } from '../components/panel.js';
+import { fetchSupabase } from '../api.js'
+import { createStatCard } from '../components/card.js'
+import { createPanel } from '../components/panel.js'
 
 export async function initOverview() {
 
   const content =
-    document.getElementById('section-content');
+    document.getElementById('section-content')
 
   content.innerHTML = `
 
-  <div class="cards-grid">
+    <div class="dashboard-container">
 
-    ${createStatCard({
-    icon: 'fas fa-users',
-    value: '—',
-    label: 'Joueurs inscrits',
-    id: 'ov-players'
-  })}
+      <div class="cards-grid">
 
-    ${createStatCard({
-    icon: 'fas fa-crosshairs',
-    value: '—',
-    label: 'Kills totaux',
-    id: 'ov-kills'
-  })}
+        ${createStatCard({
+          icon: 'fas fa-users',
+          value: '—',
+          label: 'Joueurs inscrits',
+          id: 'ov-players'
+        })}
 
-    ${createStatCard({
-    icon: 'fas fa-chart-line',
-    value: '—',
-    label: 'Meilleur K/D',
-    id: 'ov-kd'
-  })}
+        ${createStatCard({
+          icon: 'fas fa-crosshairs',
+          value: '—',
+          label: 'Kills totaux',
+          id: 'ov-kills'
+        })}
 
-    ${createStatCard({
-    icon: 'fas fa-star',
-    value: '—',
-    label: 'MVP actuel',
-    id: 'ov-mvp'
-  })}
+        ${createStatCard({
+          icon: 'fas fa-chart-line',
+          value: '—',
+          label: 'Meilleur K/D',
+          id: 'ov-kd'
+        })}
 
-  </div>
+        ${createStatCard({
+          icon: 'fas fa-star',
+          value: '—',
+          label: 'MVP actuel',
+          id: 'ov-mvp'
+        })}
 
-  ${createPanel({
-    title: '🏆 Top 5 Joueurs',
-    body: `
-      <div id="top5-list"></div>
-    `
-  })}
+      </div>
 
-`;
+      ${createPanel({
+
+        title: '🏆 Top 5 Joueurs',
+
+        body: `
+
+          <div id="top5-list"></div>
+
+        `
+      })}
+
+    </div>
+
+  `
 
   const players =
     await fetchSupabase(
       'players?select=*&order=kd.desc'
-    );
+    )
 
   if (!players || players.length === 0) {
-    return;
+    return
   }
 
   document.getElementById('ov-players').textContent =
-    players.length;
+    players.length
 
   document.getElementById('ov-kills').textContent =
     players
       .reduce((s, p) => s + (p.kills || 0), 0)
-      .toLocaleString();
+      .toLocaleString()
 
   document.getElementById('ov-kd').textContent =
-    (players[0].kd || 0).toFixed(2);
+    (players[0].kd || 0).toFixed(2)
 
   document.getElementById('ov-mvp').textContent =
-    players[0].pseudo_bf6;
+    players[0].pseudo_bf6
 
   const medals = [
     '🥇',
@@ -79,7 +87,7 @@ export async function initOverview() {
     '🥉',
     '4️⃣',
     '5️⃣'
-  ];
+  ]
 
   document.getElementById('top5-list').innerHTML =
     players
@@ -111,5 +119,5 @@ export async function initOverview() {
         </div>
 
       `)
-      .join('');
+      .join('')
 }

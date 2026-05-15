@@ -42,49 +42,55 @@
 
           <i class="fas fa-chevron-down user-chevron"></i>
 
-          <!-- DROPDOWN -->
-          <div class="user-dropdown" id="user-dropdown">
-
-            <div class="dropdown-user-card">
-
-              <img id="dropdown-avatar" class="dropdown-avatar" src="" alt="avatar">
-
-              <div class="dropdown-user-info">
-                <span id="dropdown-name">Utilisateur</span>
-                <span class="dropdown-role">CONNECTED</span>
-              </div>
-
-            </div>
-
-            <div class="dropdown-separator"></div>
-
-            <button>
-              <i class="fas fa-user"></i>
-              Mon profil
-            </button>
-
-            <button>
-              <i class="fas fa-cog"></i>
-              Paramètres
-            </button>
-
-            <button id="logout-btn" class="logout-btn">
-              <i class="fas fa-sign-out-alt"></i>
-              Déconnexion
-            </button>
-
-          </div>
-
         </div>
 
       </div>
 
     </div>
 
+    <!-- DROPDOWN -->
+    <div class="user-dropdown" id="user-dropdown">
+
+      <div class="user-dropdown-profile">
+
+        <img class="user-dropdown-avatar" id="dropdown-avatar" src="" alt="user">
+
+        <div class="user-dropdown-name" id="dropdown-name">
+          Chargement...
+        </div>
+
+        <div class="user-dropdown-status">
+          Battlefield
+        </div>
+
+      </div>
+
+      <button>
+        <i class="fas fa-user"></i>
+        Mon profil
+      </button>
+
+      <button>
+        <i class="fas fa-cog"></i>
+        Paramètres
+      </button>
+
+      <button id="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        Déconnexion
+      </button>
+
+    </div>
+
     <!-- SERVER -->
     <div class="sidebar-server">
+
       <i class="fas fa-server"></i>
-      <span id="server-name">WARSTACK</span>
+
+      <span id="server-name">
+        WARSTACK
+      </span>
+
     </div>
 
     <!-- NAV -->
@@ -214,8 +220,13 @@
 
     <!-- STATUS -->
     <div class="sidebar-status">
+
       <div class="status-dot" id="status-dot"></div>
-      <span id="status-label">BOT OFFLINE</span>
+
+      <span id="status-label">
+        BOT OFFLINE
+      </span>
+
     </div>
 
   </aside>
@@ -245,8 +256,15 @@
     <div class="modal-box">
 
       <div class="modal-header">
-        <h3 id="modal-title">Modal</h3>
-        <button class="modal-close" id="modal-close">✕</button>
+
+        <h3 id="modal-title">
+          Modal
+        </h3>
+
+        <button class="modal-close" id="modal-close">
+          ✕
+        </button>
+
       </div>
 
       <div class="modal-body" id="modal-body"></div>
@@ -266,40 +284,45 @@
     import { supabase } from './js/supabaseClient.js'
 
     // SESSION
-    const { data: { session } } =
-      await supabase.auth.getSession()
+    const { data: { session } } = await supabase.auth.getSession()
 
     if (!session) {
-
-      window.location.href =
-        '/dashboard/login.html'
+      window.location.href = '/dashboard/login.html'
     }
 
     // USER
-    const user =
-      session.user
+    const user = session.user
 
-    document.getElementById('user-name').textContent =
+    const userName =
       user.user_metadata.full_name ||
       user.user_metadata.name ||
       'Utilisateur'
 
-    document.getElementById('user-avatar').src =
+    const userAvatar =
       user.user_metadata.avatar_url ||
       user.user_metadata.picture ||
       './assets/default-avatar.png'
-    document.getElementById('dropdown-avatar').src =
-      document.getElementById('user-avatar').src
+
+    document.getElementById('user-name').textContent =
+      userName
+
+    document.getElementById('user-avatar').src =
+      userAvatar
 
     document.getElementById('dropdown-name').textContent =
-      document.getElementById('user-name').textContent
-      
+      userName
+
+    document.getElementById('dropdown-avatar').src =
+      userAvatar
+
     // GUILD
     try {
 
-      const guildResponse = await fetch('https://warstack-bot.onrender.com/api/guild')
+      const guildResponse =
+        await fetch('https://warstack-bot.onrender.com/api/guild')
 
-      const guild = await guildResponse.json()
+      const guild =
+        await guildResponse.json()
 
       document.getElementById('server-title').textContent =
         guild.name || 'WARSTACK'
@@ -313,6 +336,7 @@
     } catch (err) {
 
       console.error(err)
+
     }
 
     // DROPDOWN
@@ -330,6 +354,7 @@
       e.stopPropagation()
 
       userDropdown.classList.toggle('open')
+
       userMenu.classList.toggle('user-menu-open')
 
     })
@@ -337,6 +362,7 @@
     document.addEventListener('click', () => {
 
       userDropdown.classList.remove('open')
+
       userMenu.classList.remove('user-menu-open')
 
     })
@@ -354,7 +380,8 @@
 
       await supabase.auth.signOut()
 
-      window.location.href = '/dashboard/login.html'
+      window.location.href =
+        '/dashboard/login.html'
 
     })
 

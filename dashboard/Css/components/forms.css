@@ -1,55 +1,130 @@
-/* components/forms.css */
-
-.form-group{
+.form-group {
   display:flex;
   flex-direction:column;
   gap:6px;
+  margin-bottom:12px;
 }
 
-.form-group.full{
-  grid-column:1 / -1;
+.form-row {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
 }
 
-.form-group label{
-  font-size:10px;
-  font-weight:600;
+.form-label {
+  font-size:11px;
+  font-weight:700;
   letter-spacing:3px;
   text-transform:uppercase;
-  color:var(--text-dim);
+  color:#7dffb3;
 }
-
+.panel-body {
+  padding:18px;
+}
 .form-input,
-.form-select,
-.form-textarea{
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  color:var(--text);
-  padding:8px 12px;
-  font-family:'Rajdhani',sans-serif;
-  font-size:13px;
-  letter-spacing:1px;
-  outline:none;
-  transition:border-color .15s ease;
+.form-textarea,
+.form-select {
   width:100%;
+  height:54px;
+  padding:0 18px;
+
+  border-radius:18px;
+
+  border:1px solid rgba(0,255,120,.08);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(13,18,16,.96),
+      rgba(8,11,9,.98)
+    );
+
+  color:#ffffff;
+
+  font-family:'Rajdhani', sans-serif;
+  font-size:15px;
+  font-weight:600;
+
+  outline:none;
+
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
 }
 
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus{
-  border-color:var(--green-dim);
-  box-shadow:0 0 0 2px rgba(0,255,65,.05);
+.form-textarea {
+  min-height:140px;
+  padding:18px;
+  resize:vertical;
 }
 
 .form-input::placeholder,
-.form-textarea::placeholder{
-  color:var(--text-muted);
+.form-textarea::placeholder {
+  color:#5d7265;
 }
 
-.form-select option{
-  background:var(--surface-2);
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  border-color:rgba(0,255,120,.24);
+
+  box-shadow:
+    0 0 0 4px rgba(0,255,120,.05),
+    0 10px 30px rgba(0,0,0,.22);
+
+  transform:translateY(-1px);
 }
 
-.form-textarea{
-  resize:vertical;
-  min-height:80px;
+.form-input:hover,
+.form-textarea:hover {
+  border-color:rgba(0,255,120,.16);
+}
+
+/* DATE INPUT */
+
+input[type="date"] {
+  color-scheme:dark;
+}
+
+/* BUTTON */
+
+.form-submit {
+  height:54px;
+  padding:0 26px;
+
+  border:none;
+  border-radius:18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #00ff88,
+      #00c76a
+    );
+
+  color:#04110a;
+
+  font-family:'Rajdhani', sans-serif;
+  font-size:14px;
+  font-weight:800;
+
+  letter-spacing:2px;
+  text-transform:uppercase;
+
+  cursor:pointer;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    filter .18s ease;
+}
+
+.form-submit:hover {
+  transform:translateY(-2px);
+
+  box-shadow:
+    0 12px 30px rgba(0,255,120,.25);
+
+  filter:brightness(1.05);
 }

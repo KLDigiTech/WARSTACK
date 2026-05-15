@@ -11,15 +11,18 @@ export async function initPlayers() {
 
   content.innerHTML = createPanel({
     title: '👥 Joueurs inscrits',
-    body: `
-      <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" id="search-player" class="search-input" placeholder="Rechercher...">
-      </div>
-      <div id="players-table-wrapper">
-        <div class="loading-state">Chargement...</div>
-      </div>
-    `
+  body: `
+<div class="players-toolbar">
+  <div class="players-search-wrapper">
+    <i class="fas fa-search"></i>
+    <input type="text" id="search-player" class="players-search" placeholder="Rechercher un joueur...">
+  </div>
+</div>
+
+<div id="players-table-wrapper">
+  <div class="loading-state">Chargement...</div>
+</div>
+`
   });
 
   // Récupère joueurs + dernier snapshot
@@ -50,14 +53,14 @@ export async function initPlayers() {
 
 function calcScore(snapshot) {
   if (!snapshot) return 0;
-  const kd      = parseFloat(snapshot.kd)      || 0;
+  const kd = parseFloat(snapshot.kd) || 0;
   const winrate = parseFloat(snapshot.winrate) || 0;
-  const kills   = parseInt(snapshot.kills)     || 0;
-  const games   = parseInt(snapshot.games)     || 1;
-  const kpm     = kills / games;
-  const kd_score      = Math.min(kd / 5, 1) * 100;
+  const kills = parseInt(snapshot.kills) || 0;
+  const games = parseInt(snapshot.games) || 1;
+  const kpm = kills / games;
+  const kd_score = Math.min(kd / 5, 1) * 100;
   const winrate_score = Math.min(winrate / 60, 1) * 100;
-  const kpm_score     = Math.min(kpm / 20, 1) * 100;
+  const kpm_score = Math.min(kpm / 20, 1) * 100;
   return ((kd_score * 0.30) + (winrate_score * 0.35) + (kpm_score * 0.25)).toFixed(2);
 }
 
@@ -96,8 +99,8 @@ function renderPlayersTable(players) {
           <td>${s?.wins ?? '—'}</td>
           <td>
             ${createActionButtons({
-              remove: `window.deletePlayer('${p.discord_id}', '${p.username}')`
-            })}
+        remove: `window.deletePlayer('${p.discord_id}', '${p.username}')`
+      })}
           </td>
         </tr>
       `;
@@ -105,7 +108,7 @@ function renderPlayersTable(players) {
   });
 }
 
-window.deletePlayer = async function(discordId, username) {
+window.deletePlayer = async function (discordId, username) {
   if (!confirm(`Supprimer ${username} ?`)) return;
   await deleteSupabase(`players?discord_id=eq.${discordId}`);
   showToast('✅ Joueur supprimé');

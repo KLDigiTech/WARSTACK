@@ -1,68 +1,174 @@
 /* components/buttons.css */
 
-.btn{
+.btn {
   display:inline-flex;
   align-items:center;
-  gap:6px;
-  padding:7px 16px;
-  font-family:'Rajdhani',sans-serif;
+  justify-content:center;
+  gap:10px;
+
+  height:44px;
+  padding:0 18px;
+
+  border-radius:14px;
+
+  border:1px solid rgba(255,255,255,.06);
+
+  background:linear-gradient(
+    180deg,
+    rgba(15,20,18,.96),
+    rgba(8,11,9,.98)
+  );
+
+  color:#e7fff0;
+
+  font-family:'Rajdhani', sans-serif;
   font-size:12px;
-  font-weight:600;
+  font-weight:700;
+
   letter-spacing:2px;
   text-transform:uppercase;
-  border:1px solid;
-  cursor:pointer;
-  transition:all .15s ease;
+
   text-decoration:none;
+
+  cursor:pointer;
+
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease,
+    background .16s ease;
 }
 
-.btn-primary{
-  background:rgba(0,255,65,.08);
-  color:var(--green);
-  border-color:var(--green-dim);
+.btn i {
+  font-size:12px;
 }
 
-.btn-primary:hover{
-  background:rgba(0,255,65,.15);
-  border-color:var(--green);
-  box-shadow:0 0 12px rgba(0,255,65,.15);
+.btn:hover {
+  transform:translateY(-2px);
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.24);
 }
 
-.btn-secondary{
-  background:transparent;
-  color:var(--text-dim);
-  border-color:var(--border);
+/* GREEN */
+
+.btn-primary {
+  background:linear-gradient(
+    135deg,
+    rgba(0,255,120,.18),
+    rgba(0,180,120,.08)
+  );
+
+  border-color:rgba(0,255,120,.24);
+
+  color:#00ff88;
 }
 
-.btn-secondary:hover{
-  background:var(--surface-2);
-  color:var(--text);
-  border-color:rgba(74,124,89,.4);
+.btn-primary:hover {
+  background:linear-gradient(
+    135deg,
+    rgba(0,255,120,.24),
+    rgba(0,180,120,.12)
+  );
+
+  border-color:rgba(0,255,120,.34);
 }
 
-.btn-danger{
-  background:transparent;
-  color:var(--red);
-  border-color:rgba(255,68,68,.3);
+/* ORANGE */
+
+.btn-orange {
+  background:linear-gradient(
+    135deg,
+    rgba(255,140,0,.14),
+    rgba(255,90,0,.06)
+  );
+
+  border-color:rgba(255,140,0,.22);
+
+  color:#ffb347;
 }
 
-.btn-danger:hover{
-  background:rgba(255,68,68,.08);
-  border-color:var(--red);
+.btn-orange:hover {
+  background:linear-gradient(
+    135deg,
+    rgba(255,140,0,.20),
+    rgba(255,90,0,.10)
+  );
+
+  border-color:rgba(255,140,0,.34);
 }
 
-.btn-orange{
-  background:rgba(255,107,53,.08);
-  color:var(--orange);
-  border-color:rgba(255,107,53,.3);
+/* RED */
+
+.btn-danger {
+  background:linear-gradient(
+    135deg,
+    rgba(255,70,70,.14),
+    rgba(255,0,0,.05)
+  );
+
+  border-color:rgba(255,70,70,.22);
+
+  color:#ff7d7d;
 }
 
-.btn-orange:hover{
-  background:rgba(255,107,53,.15);
-  border-color:var(--orange);
+.btn-danger:hover {
+  background:linear-gradient(
+    135deg,
+    rgba(255,70,70,.20),
+    rgba(255,0,0,.08)
+  );
+
+  border-color:rgba(255,70,70,.34);
 }
 
-.btn-sm{
-  padding:4px 10px;
+/* SECONDARY */
+
+.btn-secondary {
+  background:linear-gradient(
+    180deg,
+    rgba(18,22,20,.96),
+    rgba(10,13,11,.98)
+  );
+
+  border-color:rgba(255,255,255,.06);
+
+  color:#d7e7dd;
+}
+
+/* SMALL */
+
+.btn-sm {
+  height:36px;
+  padding:0 14px;
+
+  border-radius:12px;
+
   font-size:11px;
+}
+
+/* SPACING */
+
+.actions-grid,
+.tournament-actions,
+.panel-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+}
+
+.actions-grid{
+  display:flex;
+
+  flex-wrap:wrap;
+
+  align-items:center;
+
+  gap:18px;
+
+  margin-top:20px;
+}
+
+.actions-grid .btn{
+  margin:0 !important;
 }
