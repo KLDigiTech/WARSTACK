@@ -55,4 +55,29 @@ router.post('/mvp', auth, async (req, res) => {
   }
 });
 
+// Vérif profil tracker.gg (public, pas d'auth)
+router.get('/tracker/:pseudo', async (req, res) => {
+  try {
+    const pseudo = encodeURIComponent(req.params.pseudo);
+    const url = `https://tracker.gg/api/v2/battlefield-2042/standard/profile/psn/${pseudo}`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      }
+    });
+    if (response.status === 404) {
+      return res.json({ found: false });
+    }
+    if (!response.ok) {
+      return res.json({ found: false });
+    }
+    const data = await response.json();
+    const platformId = data?.data?.platformInfo?.platformUserId || null;
+    res.json({ found: true, tracker_id: platformId, username: req.params.pseudo });
+  } catch (e) {
+    res.json({ found: false });
+  }
+});
+
 module.exports = router;
